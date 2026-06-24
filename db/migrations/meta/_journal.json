@@ -8,6 +8,13 @@
       "when": 1781921699136,
       "tag": "0000_outstanding_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782316602000,
+      "tag": "0001_slack_thread_sync",
+      "breakpoints": true
     }
   ]
 }

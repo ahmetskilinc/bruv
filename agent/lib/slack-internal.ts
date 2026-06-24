@@ -1,4 +1,5 @@
 import type { SlackLinkRecord } from "../../shared/types/slack-link.js";
+import type { ThreadRecord } from "../../shared/types/thread.js";
 import { appOrigin, internalHeaders } from "./internal-api.js";
 
 export async function fetchSlackLinkForMember(teamId: string, userId: string) {
@@ -36,6 +37,27 @@ export async function consumeSlackLinkCodeRemote(input: {
   return response.json() as Promise<
     { ok: true; appUserId: string } | { ok: false; reason: "invalid" | "expired" }
   >;
+}
+
+export async function upsertSlackThreadRemote(input: {
+  slackTeamId: string;
+  slackUserId: string;
+  slackChannelId: string;
+  slackThreadTs: string;
+  title?: string;
+}): Promise<ThreadRecord | null> {
+  const response = await fetch(`${appOrigin()}/api/internal/slack/thread`, {
+    method: "POST",
+    headers: internalHeaders(),
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const body = (await response.json()) as { thread: ThreadRecord | null };
+  return body.thread;
 }
 
 export function parseSlackLinkCommand(text: string) {
