@@ -168,6 +168,15 @@ async function resolvePendingInput(
   return true;
 }
 
+/**
+ * Sendblue delivers image attachments as a `media_url` field on the payload.
+ * The type definition may not expose it yet, so we extract it safely.
+ */
+function extractMediaUrl(payload: SendblueMessagePayload): string {
+  const raw = (payload as unknown as Record<string, unknown>).media_url;
+  return typeof raw === "string" ? raw.trim() : "";
+}
+
 async function dispatchInbound(
   payload: SendblueMessagePayload,
   send: SendFn<SendblueChannelState>,
@@ -176,8 +185,10 @@ async function dispatchInbound(
   const threadId = threadIdFromPayload(payload, sendblue);
   const contactNumber = contactNumberFromPayload(payload);
   const text = payload.content?.trim() ?? "";
+  const mediaUrl = extractMediaUrl(payload);
 
-  if (!text) {
+  // Ignore messages with neither text nor an image attachment.
+  if (!text && !mediaUrl) {
     return;
   }
 
@@ -232,7 +243,8 @@ async function dispatchInbound(
     inflightSend = { send, auth, continuationToken: threadId, state: sendOptions.state };
     await send(
       {
-        message: text,
+        message: text || undefined,
+        images: mediaUrl ? [{ url: mediaUrl }] : undefined,
         context: turnContext,
       },
       sendOptions,
