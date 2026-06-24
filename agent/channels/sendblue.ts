@@ -241,14 +241,27 @@ async function dispatchInbound(
     }
 
     inflightSend = { send, auth, continuationToken: threadId, state: sendOptions.state };
-    await send(
-      {
-        message: text || undefined,
-        images: mediaUrl ? [{ url: mediaUrl }] : undefined,
-        context: turnContext,
-      },
-      sendOptions,
-    );
+
+    if (mediaUrl) {
+      // When an image is present, send as a multimodal parts array.
+      // Context strings are prepended as text parts so channel instructions stay intact.
+      await send(
+        [
+          ...turnContext.map((ctx) => ({ type: "text" as const, text: ctx })),
+          ...(text ? [{ type: "text" as const, text }] : []),
+          { type: "image" as const, image: new URL(mediaUrl) },
+        ],
+        sendOptions,
+      );
+    } else {
+      await send(
+        {
+          message: text,
+          context: turnContext,
+        },
+        sendOptions,
+      );
+    }
   } catch (error) {
     console.error("[sendblue] agent send failed", error);
   } finally {
