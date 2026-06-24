@@ -12,6 +12,7 @@ import {
   consumeSlackLinkCodeRemote,
   fetchSlackLinkForMember,
   parseSlackLinkCommand,
+  upsertSlackThreadRemote,
 } from "../lib/slack-internal.js";
 
 async function slackUserProfile(ctx: SlackContext, userId: string) {
@@ -166,6 +167,18 @@ async function buildSlackTurn(ctx: SlackContext, message: SlackMessage) {
     context.push(
       `This Slack account is not linked to a ${agent.name} profile yet. Open ${linkUrl}, generate a link code, then message \`link <code>\` here.`,
     );
+  } else if (message.teamId && message.channelId && message.threadTs) {
+    // User is linked — sync this Slack thread into the web app so it shows in the sidebar.
+    const firstUserMessage = message.markdown ?? message.text ?? "";
+    void upsertSlackThreadRemote({
+      slackTeamId: message.teamId,
+      slackUserId: userId,
+      slackChannelId: message.channelId,
+      slackThreadTs: message.threadTs,
+      title: firstUserMessage || undefined,
+    }).catch(() => {
+      // Non-fatal — thread sync failing shouldn't break the conversation.
+    });
   }
 
   return {

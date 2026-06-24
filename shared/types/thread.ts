@@ -1,8 +1,13 @@
+export type ThreadChannel = "web" | "slack" | "imessage";
+
 export interface ThreadSummary {
   id: string;
   title: string;
   updatedAt: number;
   createdAt: number;
+  channel: ThreadChannel;
+  slackChannelId?: string | null;
+  slackThreadTs?: string | null;
 }
 
 export interface EveSessionCursor {
