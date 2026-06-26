@@ -57,7 +57,7 @@ export function ChatMessage({
         className="animate-in fade-in slide-in-from-bottom-2 duration-300"
       >
         <MessageContent>
-          <Bubble variant="secondary">
+          <Bubble variant="brand">
             <BubbleContent className="whitespace-pre-wrap">{text}</BubbleContent>
           </Bubble>
         </MessageContent>
@@ -140,7 +140,13 @@ function Part({
   canRespond: boolean;
 }) {
   if (part.type === "text") {
-    return part.text ? <Response text={part.text} /> : null;
+    return part.text ? (
+      <Bubble variant="muted">
+        <BubbleContent>
+          <Response text={part.text} />
+        </BubbleContent>
+      </Bubble>
+    ) : null;
   }
   if (part.type === "reasoning") {
     return part.text ? (
