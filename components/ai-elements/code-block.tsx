@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { Check, Clipboard } from "@phosphor-icons/react";
 import type { ComponentProps, CSSProperties, HTMLAttributes } from "react";
 import {
   createContext,
@@ -495,7 +495,7 @@ export const CodeBlockCopyButton = ({
     []
   );
 
-  const Icon = isCopied ? CheckIcon : ClipboardIcon;
+  const Icon = isCopied ? Check : Clipboard;
 
   return (
     <Button

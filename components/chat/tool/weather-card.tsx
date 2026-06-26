@@ -1,23 +1,23 @@
 "use client";
 
-import { BoltIcon, CloudIcon, SunIcon } from "@heroicons/react/24/outline";
+import { Lightning, Cloud, Sun } from "@phosphor-icons/react";
 import { type ComponentType, type SVGProps } from "react";
 import type { WeatherOutput } from "@/shared/tools/weather";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  sun: SunIcon,
-  cloud: CloudIcon,
-  "cloud-sun": CloudIcon,
-  "cloud-fog": CloudIcon,
-  "cloud-drizzle": CloudIcon,
-  "cloud-rain": CloudIcon,
-  "cloud-snow": CloudIcon,
-  "cloud-lightning": BoltIcon,
+  sun: Sun,
+  cloud: Cloud,
+  "cloud-sun": Cloud,
+  "cloud-fog": Cloud,
+  "cloud-drizzle": Cloud,
+  "cloud-rain": Cloud,
+  "cloud-snow": Cloud,
+  "cloud-lightning": Lightning,
 };
 
 function WeatherIcon({ name, className }: { name: string; className?: string }) {
-  const Icon = ICONS[name] ?? CloudIcon;
+  const Icon = ICONS[name] ?? Cloud;
   return <Icon className={className} />;
 }
 

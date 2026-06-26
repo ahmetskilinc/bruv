@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
-import { SparklesIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Sparkle, CaretDown } from "@phosphor-icons/react";
 import type { ComponentProps, ReactNode } from "react";
 import {
   createContext,
@@ -181,9 +181,9 @@ export const ReasoningTrigger = memo(
       >
         {children ?? (
           <>
-            <SparklesIcon className="size-4" />
+            <Sparkle className="size-4" />
             {getThinkingMessage(isStreaming, duration)}
-            <ChevronDownIcon
+            <CaretDown
               className={cn(
                 "size-4 transition-transform",
                 isOpen ? "rotate-180" : "rotate-0"

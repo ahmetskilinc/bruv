@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CheckCircleIcon, InformationCircleIcon, ExclamationTriangleIcon, XCircleIcon, ArrowPathIcon } from "@heroicons/react/24/outline"
+import { CheckCircle, Info, Warning, XCircle, ArrowsClockwise } from "@phosphor-icons/react"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
@@ -13,19 +13,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: (
-          <CheckCircleIcon className="size-4" />
+          <CheckCircle className="size-4" />
         ),
         info: (
-          <InformationCircleIcon className="size-4" />
+          <Info className="size-4" />
         ),
         warning: (
-          <ExclamationTriangleIcon className="size-4" />
+          <Warning className="size-4" />
         ),
         error: (
-          <XCircleIcon className="size-4" />
+          <XCircle className="size-4" />
         ),
         loading: (
-          <ArrowPathIcon className="size-4 animate-spin" />
+          <ArrowsClockwise className="size-4 animate-spin" />
         ),
       }}
       style={

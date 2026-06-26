@@ -13,10 +13,15 @@ export function useConnectors() {
   });
 
   const connect = useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<{ url: string }>(`/api/integrations/${id}/connect`, {
-        method: "POST",
-      }).then((r) => r.url),
+    mutationFn: ({ id, resumeUrl }: { id: string; resumeUrl?: string }) => {
+      const query = resumeUrl
+        ? `?resumeUrl=${encodeURIComponent(resumeUrl)}`
+        : "";
+      return apiFetch<{ url: string }>(
+        `/api/integrations/${id}/connect${query}`,
+        { method: "POST" },
+      ).then((r) => r.url);
+    },
   });
 
   const test = useMutation({

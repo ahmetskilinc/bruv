@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import {
-  ArrowRightStartOnRectangleIcon,
-  PuzzlePieceIcon,
-  Cog6ToothIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
+  SignOut,
+  PuzzlePiece,
+  GearSix,
+  ShieldCheck,
+} from "@phosphor-icons/react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -47,11 +47,11 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push("/settings/profile")}>
-            <Cog6ToothIcon data-icon="inline-start" />
+            <GearSix data-icon="inline-start" />
             profile
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/settings/integrations")}>
-            <PuzzlePieceIcon data-icon="inline-start" />
+            <PuzzlePiece data-icon="inline-start" />
             integrations
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -60,7 +60,7 @@ export function UserMenu() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => router.push("/admin")}>
-                <ShieldCheckIcon data-icon="inline-start" />
+                <ShieldCheck data-icon="inline-start" />
                 admin
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -74,7 +74,7 @@ export function UserMenu() {
               router.push("/login");
             }}
           >
-            <ArrowRightStartOnRectangleIcon data-icon="inline-start" />
+            <SignOut data-icon="inline-start" />
             sign out
           </DropdownMenuItem>
         </DropdownMenuGroup>

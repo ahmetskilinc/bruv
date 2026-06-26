@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { SettingsNav } from "@/components/settings/settings-nav";
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
@@ -11,7 +11,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
           href="/"
           className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
         >
-          <ArrowLeftIcon className="size-4" />
+          <ArrowLeft className="size-4" />
           back to chat
         </Link>
         <h1 className="mt-2 text-2xl font-semibold lowercase">settings</h1>

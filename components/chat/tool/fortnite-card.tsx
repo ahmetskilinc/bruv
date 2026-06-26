@@ -1,6 +1,6 @@
 "use client";
 
-import { TrophyIcon } from "@heroicons/react/24/outline";
+import { Trophy } from "@phosphor-icons/react";
 
 export interface FortniteOutput {
   name: string;
@@ -27,7 +27,7 @@ export function FortniteCard({ output }: { output: FortniteOutput }) {
     <div className="bg-card w-full max-w-sm rounded-xl border p-4 transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-1 duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <TrophyIcon className="text-muted-foreground size-4" />
+          <Trophy className="text-muted-foreground size-4" />
           <span className="text-sm font-medium">{output.name}</span>
         </div>
         {output.level != null && (
