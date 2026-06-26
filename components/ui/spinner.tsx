@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { ArrowsClockwise } from "@phosphor-icons/react"
+import { ArrowsClockwise } from "@phosphor-icons/react/ssr"
 
 function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
   return (
