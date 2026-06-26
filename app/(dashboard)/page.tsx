@@ -2,20 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import {
-  CodeBracketSquareIcon,
-  ListBulletIcon,
-  CloudIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+  CodeBlock,
+  ListBullets,
+  Cloud,
+  Sparkle,
+} from "@phosphor-icons/react";
 import { useThreads } from "@/hooks/use-threads";
 import { useSession } from "@/lib/auth-client";
 import { Composer } from "@/components/chat/composer";
 
 const SUGGESTIONS = [
-  { label: "show me my open PRs", icon: CodeBracketSquareIcon },
-  { label: "what's on my Linear?", icon: ListBulletIcon },
-  { label: "weather in london", icon: CloudIcon },
-  { label: "draw me something stupid", icon: SparklesIcon },
+  { label: "show me my open PRs", icon: CodeBlock },
+  { label: "what's on my Linear?", icon: ListBullets },
+  { label: "weather in london", icon: Cloud },
+  { label: "draw me something stupid", icon: Sparkle },
 ];
 
 // bruv-voice subtitles, picked by a stable per-load index (no hydration mismatch

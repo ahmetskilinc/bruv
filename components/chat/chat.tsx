@@ -4,12 +4,18 @@ import { useEffect, useRef } from "react";
 import { useChatSession } from "@/hooks/use-chat-session";
 import type { ThreadState } from "@/shared/types/thread";
 import { ChatMessage } from "./message";
+import { AuthorizationPrompt } from "./authorization-prompt";
 import { Composer } from "./composer";
 import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller";
+import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker";
+import { Spinner } from "@/components/ui/spinner";
 
 export function Chat({
   threadId,
@@ -36,23 +42,50 @@ export function Chat({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <Conversation className="flex-1">
-        <ConversationContent className="mx-auto w-full max-w-3xl">
-          {chat.messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              onRespond={chat.respond}
-              canRespond={!chat.isBusy}
-            />
-          ))}
-          {chat.status === "submitted" && <TypingDots />}
-          {chat.error && (
-            <p className="text-destructive text-sm">{chat.error.message}</p>
-          )}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+      <MessageScrollerProvider>
+        <MessageScroller className="flex-1">
+          <MessageScrollerViewport>
+            <MessageScrollerContent className="mx-auto w-full max-w-3xl px-4 py-6">
+              {chat.messages.map((message) => (
+                <MessageScrollerItem
+                  key={message.id}
+                  messageId={message.id}
+                  scrollAnchor={message.role === "user"}
+                >
+                  <ChatMessage
+                    message={message}
+                    onRespond={chat.respond}
+                    canRespond={!chat.isBusy}
+                  />
+                </MessageScrollerItem>
+              ))}
+              {chat.authorization && (
+                <MessageScrollerItem scrollAnchor={false}>
+                  <AuthorizationPrompt authorization={chat.authorization} />
+                </MessageScrollerItem>
+              )}
+              {chat.status === "submitted" && (
+                <MessageScrollerItem scrollAnchor={false}>
+                  <Marker role="status">
+                    <MarkerIcon>
+                      <Spinner />
+                    </MarkerIcon>
+                    <MarkerContent>Thinking…</MarkerContent>
+                  </Marker>
+                </MessageScrollerItem>
+              )}
+              {chat.error && (
+                <MessageScrollerItem scrollAnchor={false}>
+                  <p className="text-destructive text-sm">
+                    {chat.error.message}
+                  </p>
+                </MessageScrollerItem>
+              )}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+          <MessageScrollerButton />
+        </MessageScroller>
+      </MessageScrollerProvider>
 
       <div className="mx-auto w-full max-w-3xl px-4 pb-4">
         <Composer
@@ -61,20 +94,6 @@ export function Chat({
           isBusy={chat.isBusy}
         />
       </div>
-    </div>
-  );
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="bg-brand/70 size-1.5 animate-bounce rounded-full"
-          style={{ animationDelay: `${i * 0.15}s` }}
-        />
-      ))}
     </div>
   );
 }

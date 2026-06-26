@@ -5,6 +5,6 @@ export const agent = {
   tagline: "what do you need?",
   description: "ahmet, as an agent — on the web, slack, and imessage.",
   avatar: {
-    icon: "i-lucide-bot",
+    icon: "i-heroicons-sparkles",
   },
 } as const;

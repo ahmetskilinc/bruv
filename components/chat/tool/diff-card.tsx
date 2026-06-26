@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Component, type ReactNode } from "react";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { FileText } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { ShowDiffOutput } from "@/shared/tools/show_diff";
 
@@ -92,7 +92,7 @@ export function DiffCard({ output }: { output: ShowDiffOutput }) {
   if (output.empty) {
     return (
       <div className="bg-card text-muted-foreground flex w-full max-w-md items-center gap-1.5 rounded-xl border px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-300">
-        <DocumentTextIcon className="size-3.5" />
+        <FileText className="size-3.5" />
         no changes in {output.dir === "." ? "the workspace" : output.dir}
       </div>
     );

@@ -9,13 +9,13 @@ import {
 import { cn } from "@/lib/utils";
 import type { DynamicToolUIPart, ToolUIPart } from "ai";
 import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  EllipsisHorizontalCircleIcon,
-  ClockIcon,
-  WrenchIcon,
-  XCircleIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle,
+  CaretDown,
+  DotsThreeCircle,
+  Clock,
+  Wrench,
+  XCircle,
+} from "@phosphor-icons/react";
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 
@@ -55,13 +55,13 @@ const statusLabels: Record<ToolPart["state"], string> = {
 };
 
 const statusIcons: Record<ToolPart["state"], ReactNode> = {
-  "approval-requested": <ClockIcon className="size-4 text-yellow-600" />,
-  "approval-responded": <CheckCircleIcon className="size-4 text-blue-600" />,
-  "input-available": <ClockIcon className="size-4 animate-pulse" />,
-  "input-streaming": <EllipsisHorizontalCircleIcon className="size-4" />,
-  "output-available": <CheckCircleIcon className="size-4 text-green-600" />,
-  "output-denied": <XCircleIcon className="size-4 text-orange-600" />,
-  "output-error": <XCircleIcon className="size-4 text-red-600" />,
+  "approval-requested": <Clock className="size-4 text-yellow-600" />,
+  "approval-responded": <CheckCircle className="size-4 text-blue-600" />,
+  "input-available": <Clock className="size-4 animate-pulse" />,
+  "input-streaming": <DotsThreeCircle className="size-4" />,
+  "output-available": <CheckCircle className="size-4 text-green-600" />,
+  "output-denied": <XCircle className="size-4 text-orange-600" />,
+  "output-error": <XCircle className="size-4 text-red-600" />,
 };
 
 export const getStatusBadge = (status: ToolPart["state"]) => (
@@ -91,11 +91,11 @@ export const ToolHeader = ({
       {...props}
     >
       <div className="flex items-center gap-2">
-        <WrenchIcon className="size-4 text-muted-foreground" />
+        <Wrench className="size-4 text-muted-foreground" />
         <span className="font-medium text-sm">{title ?? derivedName}</span>
         {getStatusBadge(state)}
       </div>
-      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <CaretDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
     </CollapsibleTrigger>
   );
 };

@@ -7,20 +7,20 @@ import type {
   EveMessagePart,
 } from "eve/react";
 import type { InputResponse } from "eve/client";
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
-  ArrowPathIcon,
-  CheckIcon,
-  ClipboardIcon,
-  WrenchIcon,
-} from "@heroicons/react/24/outline";
+  ArrowsClockwise,
+  Check,
+  Clipboard,
+  Wrench,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { WeatherOutput } from "@/shared/tools/weather";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ui/message";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Streamdown } from "streamdown";
+import { cjk } from "@streamdown/cjk";
+import { code } from "@streamdown/code";
 import {
   Reasoning,
   ReasoningContent,
@@ -53,11 +53,13 @@ export function ChatMessage({
       .trim();
     return (
       <Message
-        from="user"
+        align="end"
         className="animate-in fade-in slide-in-from-bottom-2 duration-300"
       >
         <MessageContent>
-          <span className="whitespace-pre-wrap">{text}</span>
+          <Bubble variant="secondary">
+            <BubbleContent className="whitespace-pre-wrap">{text}</BubbleContent>
+          </Bubble>
         </MessageContent>
       </Message>
     );
@@ -70,7 +72,7 @@ export function ChatMessage({
 
   return (
     <Message
-      from="assistant"
+      align="start"
       className="animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <MessageContent>
@@ -88,6 +90,23 @@ export function ChatMessage({
   );
 }
 
+const streamdownPlugins = { cjk, code };
+
+// Markdown renderer for assistant text (replaces ai-elements MessageResponse);
+// memoized so streaming re-renders stay cheap.
+const Response = memo(
+  ({ text }: { text: string }) => (
+    <Streamdown
+      className="size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+      plugins={streamdownPlugins}
+    >
+      {text}
+    </Streamdown>
+  ),
+  (prev, next) => prev.text === next.text
+);
+Response.displayName = "Response";
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -99,12 +118,12 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="text-muted-foreground hover:text-foreground -mt-1 flex w-fit items-center gap-1 rounded-md px-1.5 py-1 text-xs opacity-0 transition group-hover:opacity-100"
+      className="text-muted-foreground hover:text-foreground -mt-1 flex w-fit items-center gap-1 rounded-md px-1.5 py-1 text-xs opacity-0 transition group-hover/message:opacity-100"
     >
       {copied ? (
-        <CheckIcon className="size-3.5" />
+        <Check className="size-3.5" />
       ) : (
-        <ClipboardIcon className="size-3.5" />
+        <Clipboard className="size-3.5" />
       )}
       {copied ? "copied" : "copy"}
     </button>
@@ -121,7 +140,7 @@ function Part({
   canRespond: boolean;
 }) {
   if (part.type === "text") {
-    return part.text ? <MessageResponse>{part.text}</MessageResponse> : null;
+    return part.text ? <Response text={part.text} /> : null;
   }
   if (part.type === "reasoning") {
     return part.text ? (
@@ -210,9 +229,9 @@ function ToolPart({
       )}
     >
       {running ? (
-        <ArrowPathIcon className="text-brand size-3.5 animate-spin" />
+        <ArrowsClockwise className="text-brand size-3.5 animate-spin" />
       ) : (
-        <WrenchIcon className="size-3.5" />
+        <Wrench className="size-3.5" />
       )}
       <span>{label}</span>
     </div>

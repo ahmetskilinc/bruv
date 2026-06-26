@@ -47,7 +47,7 @@ function ConnectorCard({
   revoke,
 }: {
   connector: ConnectorSummary;
-  connect: (id: string) => Promise<string>;
+  connect: (input: { id: string; resumeUrl?: string }) => Promise<string>;
   test: (id: string) => Promise<string[]>;
   revoke: (id: string) => Promise<unknown>;
 }) {
@@ -59,7 +59,7 @@ function ConnectorCard({
   async function onConnect() {
     setBusy("connect");
     try {
-      const url = await connect(connector.id);
+      const url = await connect({ id: connector.id });
       window.location.href = url;
     } catch (error) {
       toast.error(msg(error));

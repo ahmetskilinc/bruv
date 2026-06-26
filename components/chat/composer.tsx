@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUpIcon, StopIcon } from "@heroicons/react/24/outline";
+import { ArrowUp, Stop } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 export function Composer({
@@ -66,7 +66,7 @@ export function Composer({
           onClick={onStop}
           aria-label="Stop"
         >
-          <StopIcon />
+          <Stop />
         </Button>
       ) : (
         <Button
@@ -76,7 +76,7 @@ export function Composer({
           disabled={!value.trim()}
           aria-label="Send"
         >
-          <ArrowUpIcon />
+          <ArrowUp />
         </Button>
       )}
     </div>

@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+  MagnifyingGlass,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { useThreads } from "@/hooks/use-threads";
 import type { ThreadSummary } from "@/shared/types/thread";
 import { Button } from "@/components/ui/button";
@@ -111,12 +111,12 @@ export function AppSidebar() {
           size="sm"
           className="w-full justify-start bg-transparent font-normal"
         >
-          <PlusIcon data-icon="inline-start" />
+          <Plus data-icon="inline-start" />
           new chat
         </Button>
         {threads.length > 0 && (
           <div className="relative">
-            <MagnifyingGlassIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
+            <MagnifyingGlass className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
             <SidebarInput
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -159,7 +159,7 @@ export function AppSidebar() {
                         if (params?.id === thread.id) router.push("/");
                       }}
                     >
-                      <TrashIcon />
+                      <Trash />
                     </SidebarMenuAction>
                   </SidebarMenuItem>
                 ))}
