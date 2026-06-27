@@ -1,19 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { Button, Card, Input, Label, Textarea, toast } from "bruv-ui";
 import { useProfile } from "@/hooks/use-profile";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export function ProfileForm() {
   const { profile, isLoading, saveProfile, isSaving } = useProfile();
@@ -50,13 +39,14 @@ export function ProfileForm() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>profile</CardTitle>
-        <CardDescription>
-          how bruv knows you. your phone number links iMessage to this account.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <Card.Content>
+        <Card.Header>
+          <div className="text-foreground font-semibold">profile</div>
+          <p className="text-muted-foreground text-sm">
+            how bruv knows you. your phone number links iMessage to this account.
+          </p>
+        </Card.Header>
+        <Card.Body className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">name</Label>
           <Input
@@ -118,7 +108,8 @@ export function ProfileForm() {
             {isSaving ? "saving…" : "save"}
           </Button>
         </div>
-      </CardContent>
+        </Card.Body>
+      </Card.Content>
     </Card>
   );
 }

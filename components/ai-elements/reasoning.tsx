@@ -1,11 +1,7 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible } from "bruv-ui";
 import { cn } from "@/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
@@ -42,7 +38,7 @@ export const useReasoning = () => {
   return context;
 };
 
-export type ReasoningProps = ComponentProps<typeof Collapsible> & {
+export type ReasoningProps = ComponentProps<typeof Collapsible.Root> & {
   isStreaming?: boolean;
   open?: boolean;
   defaultOpen?: boolean;
@@ -133,21 +129,21 @@ export const Reasoning = memo(
 
     return (
       <ReasoningContext.Provider value={contextValue}>
-        <Collapsible
+        <Collapsible.Root
           className={cn("not-prose mb-4", className)}
           onOpenChange={handleOpenChange}
           open={isOpen}
           {...props}
         >
           {children}
-        </Collapsible>
+        </Collapsible.Root>
       </ReasoningContext.Provider>
     );
   }
 );
 
 export type ReasoningTriggerProps = ComponentProps<
-  typeof CollapsibleTrigger
+  typeof Collapsible.Trigger
 > & {
   getThinkingMessage?: (isStreaming: boolean, duration?: number) => ReactNode;
 };
@@ -172,7 +168,7 @@ export const ReasoningTrigger = memo(
     const { isStreaming, isOpen, duration } = useReasoning();
 
     return (
-      <CollapsibleTrigger
+      <Collapsible.Trigger
         className={cn(
           "flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
           className
@@ -191,13 +187,13 @@ export const ReasoningTrigger = memo(
             />
           </>
         )}
-      </CollapsibleTrigger>
+      </Collapsible.Trigger>
     );
   }
 );
 
 export type ReasoningContentProps = ComponentProps<
-  typeof CollapsibleContent
+  typeof Collapsible.Panel
 > & {
   children: string;
 };
@@ -206,16 +202,12 @@ const streamdownPlugins = { cjk, code };
 
 export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
-    <CollapsibleContent
-      className={cn(
-        "mt-4 text-sm",
-        "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-muted-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-        className
-      )}
+    <Collapsible.Panel
+      className={cn("mt-4 text-sm", "text-muted-foreground outline-none", className)}
       {...props}
     >
       <Streamdown plugins={streamdownPlugins}>{children}</Streamdown>
-    </CollapsibleContent>
+    </Collapsible.Panel>
   )
 );
 

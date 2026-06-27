@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowUp, Stop } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
+import { Button } from "bruv-ui";
 
 export function Composer({
   onSend,
@@ -60,24 +60,21 @@ export function Composer({
       />
       {isBusy ? (
         <Button
-          size="icon"
           variant="secondary"
+          iconLeft={<Stop />}
           className="size-8 shrink-0 rounded-xl"
           onClick={onStop}
           aria-label="Stop"
-        >
-          <Stop />
-        </Button>
+        />
       ) : (
         <Button
-          size="icon"
-          className="bg-brand text-brand-foreground hover:bg-brand/90 size-8 shrink-0 rounded-xl transition-colors disabled:opacity-40"
+          variant="primary"
+          iconLeft={<ArrowUp />}
+          className="size-8 shrink-0 rounded-xl disabled:opacity-40"
           onClick={submit}
           disabled={!value.trim()}
           aria-label="Send"
-        >
-          <ArrowUp />
-        </Button>
+        />
       )}
     </div>
   );

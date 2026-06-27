@@ -1,20 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { Alert, Badge, Button, Card, toast } from "bruv-ui";
 import { useConnectors } from "@/hooks/use-connectors";
 import { useSlackLink } from "@/hooks/use-slack-link";
 import type { ConnectorSummary } from "@/shared/types/connector";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function msg(error: unknown) {
   return error instanceof Error ? error.message : "something went wrong";
@@ -93,31 +83,30 @@ function ConnectorCard({
 
   return (
     <Card>
-      <CardHeader>
+      <Card.Content>
+        <Card.Header>
         <div className="flex items-center justify-between">
-          <CardTitle>{connector.name}</CardTitle>
-          <Badge variant={connected ? "default" : status.state === "error" ? "destructive" : "secondary"}>
+          <div className="text-foreground font-semibold">{connector.name}</div>
+          <Badge variant={connected ? "accent" : status.state === "error" ? "danger" : "neutral"}>
             {connected ? (connector.connectedAs ?? "connected") : status.state.replace(/_/g, " ")}
           </Badge>
         </div>
-        <CardDescription>{connector.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+        <p className="text-muted-foreground text-sm">{connector.description}</p>
+        </Card.Header>
+        <Card.Body className="flex flex-col gap-3">
         {status.state === "setup_required" && (
           <Alert>
-            <AlertTitle>setup needed</AlertTitle>
-            <AlertDescription>
-              <span className="whitespace-pre-wrap">
-                {status.message}
-                {status.hint ? `\n\n${status.hint}` : ""}
-              </span>
-            </AlertDescription>
+            <div className="font-medium">setup needed</div>
+            <span className="whitespace-pre-wrap">
+              {status.message}
+              {status.hint ? `\n\n${status.hint}` : ""}
+            </span>
           </Alert>
         )}
         {status.state === "error" && (
-          <Alert variant="destructive">
-            <AlertTitle>error</AlertTitle>
-            <AlertDescription>{status.message}</AlertDescription>
+          <Alert variant="danger">
+            <div className="font-medium">error</div>
+            {status.message}
           </Alert>
         )}
 
@@ -150,7 +139,8 @@ function ConnectorCard({
             ))}
           </ul>
         )}
-      </CardContent>
+        </Card.Body>
+      </Card.Content>
     </Card>
   );
 }
@@ -184,18 +174,19 @@ function SlackLinkCard() {
 
   return (
     <Card>
-      <CardHeader>
+      <Card.Content>
+        <Card.Header>
         <div className="flex items-center justify-between">
-          <CardTitle>Slack</CardTitle>
-          <Badge variant={link?.linked ? "default" : "secondary"}>
+          <div className="text-foreground font-semibold">Slack</div>
+          <Badge variant={link?.linked ? "accent" : "neutral"}>
             {link?.linked ? "linked" : "not linked"}
           </Badge>
         </div>
-        <CardDescription>
+        <p className="text-muted-foreground text-sm">
           link your Slack account so mentions and DMs use this profile.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+        </p>
+        </Card.Header>
+        <Card.Body className="flex flex-col gap-3">
         {isLoading && <p className="text-muted-foreground text-sm">loading…</p>}
 
         {link?.linked ? (
@@ -209,12 +200,10 @@ function SlackLinkCard() {
           </div>
         ) : link?.pendingCode ? (
           <Alert>
-            <AlertTitle>
+            <div className="font-medium">
               your code: <span className="font-mono">{link.pendingCode}</span>
-            </AlertTitle>
-            <AlertDescription>
-              DM bruv on Slack: <span className="font-mono">link {link.pendingCode}</span>
-            </AlertDescription>
+            </div>
+            DM bruv on Slack: <span className="font-mono">link {link.pendingCode}</span>
           </Alert>
         ) : (
           <div>
@@ -223,7 +212,8 @@ function SlackLinkCard() {
             </Button>
           </div>
         )}
-      </CardContent>
+        </Card.Body>
+      </Card.Content>
     </Card>
   );
 }

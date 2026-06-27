@@ -16,8 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { WeatherOutput } from "@/shared/tools/weather";
-import { Message, MessageContent } from "@/components/ui/message";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Message, MessageContent, Bubble, BubbleContent, Button } from "bruv-ui";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
@@ -26,7 +25,6 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
-import { Button } from "@/components/ui/button";
 import { WeatherCard } from "./tool/weather-card";
 import { RepoListCard, type RepoListOutput } from "./tool/repo-list-card";
 import { PrListCard, type PrListOutput } from "./tool/pr-list-card";
@@ -57,7 +55,7 @@ export function ChatMessage({
         className="animate-in fade-in slide-in-from-bottom-2 duration-300"
       >
         <MessageContent>
-          <Bubble variant="brand">
+          <Bubble variant="default">
             <BubbleContent className="whitespace-pre-wrap">{text}</BubbleContent>
           </Bubble>
         </MessageContent>
@@ -286,9 +284,9 @@ function ApprovalRequest({
               size="sm"
               variant={
                 option.style === "danger"
-                  ? "destructive"
+                  ? "danger"
                   : option.style === "primary"
-                    ? "default"
+                    ? "primary"
                     : "outline"
               }
               onClick={() =>

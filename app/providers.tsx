@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip } from "bruv-ui";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -17,13 +17,13 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider
-      attribute="class"
+      attribute={["class", "data-theme"]}
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>{children}</TooltipProvider>
+        <Tooltip.Provider>{children}</Tooltip.Provider>
       </QueryClientProvider>
     </ThemeProvider>
   );

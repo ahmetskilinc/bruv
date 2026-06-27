@@ -3,31 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import {
-  MagnifyingGlass,
-  Plus,
-  Trash,
-} from "@phosphor-icons/react";
+import { MagnifyingGlass, Plus, Trash } from "@phosphor-icons/react";
 import { useThreads } from "@/hooks/use-threads";
 import type { ThreadSummary } from "@/shared/types/thread";
-import { Button } from "@/components/ui/button";
+import { Button, Input, Sidebar } from "bruv-ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInput,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  useSidebar,
-} from "@/components/ui/sidebar";
 
 const GROUP_ORDER = ["today", "yesterday", "previous 7 days", "earlier"] as const;
 type GroupKey = (typeof GROUP_ORDER)[number];
@@ -62,16 +43,10 @@ export function AppSidebar() {
   const { threads, createThread, deleteThread } = useThreads();
   const router = useRouter();
   const params = useParams<{ id?: string }>();
-  const { isMobile, setOpenMobile } = useSidebar();
   const [query, setQuery] = useState("");
-
-  const closeOnMobile = () => {
-    if (isMobile) setOpenMobile(false);
-  };
 
   async function newChat() {
     const thread = await createThread({});
-    closeOnMobile();
     router.push(`/chat/${thread.id}`);
   }
 
@@ -94,91 +69,86 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="gap-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex items-center justify-between px-1">
           <Link
             href="/"
-            onClick={closeOnMobile}
             className="text-base font-semibold tracking-tight lowercase"
           >
             bruv
           </Link>
           <ThemeToggle />
         </div>
+
         <Button
           onClick={newChat}
           variant="outline"
           size="sm"
-          className="w-full justify-start bg-transparent font-normal"
+          iconLeft={<Plus />}
+          className="w-full justify-start font-normal"
         >
-          <Plus data-icon="inline-start" />
           new chat
         </Button>
+
         {threads.length > 0 && (
-          <div className="relative">
-            <MagnifyingGlass className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
-            <SidebarInput
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="search chats…"
-              className="pl-8"
-            />
-          </div>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="search chats…"
+            iconLeft={<MagnifyingGlass />}
+            size="sm"
+          />
         )}
-      </SidebarHeader>
 
-      <SidebarContent>
-        {GROUP_ORDER.map((key) => {
-          const items = groups.get(key);
-          if (!items || items.length === 0) return null;
-          return (
-            <SidebarGroup key={key}>
-              <SidebarGroupLabel>{key}</SidebarGroupLabel>
-              <SidebarMenu>
+        <div className="-mx-2 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2">
+          {GROUP_ORDER.map((key) => {
+            const items = groups.get(key);
+            if (!items || items.length === 0) return null;
+            return (
+              <Sidebar.Section key={key}>
+                <Sidebar.Label>{key}</Sidebar.Label>
                 {items.map((thread) => (
-                  <SidebarMenuItem key={thread.id}>
-                    <SidebarMenuButton
-                      isActive={params?.id === thread.id}
-                      render={
-                        <Link
-                          href={`/chat/${thread.id}`}
-                          onClick={closeOnMobile}
-                        />
-                      }
-                    >
-                      {thread.channel === "slack" && (
-                        <SlackIcon className="text-muted-foreground size-3 shrink-0" />
-                      )}
-                      <span className="truncate">{thread.title}</span>
-                    </SidebarMenuButton>
-                    <SidebarMenuAction
-                      showOnHover
-                      aria-label="Delete chat"
-                      onClick={async () => {
-                        await deleteThread(thread.id);
-                        if (params?.id === thread.id) router.push("/");
-                      }}
-                    >
-                      <Trash />
-                    </SidebarMenuAction>
-                  </SidebarMenuItem>
+                  <Sidebar.Link
+                    key={thread.id}
+                    name={thread.title}
+                    href={`/chat/${thread.id}`}
+                    active={params?.id === thread.id}
+                    icon={
+                      thread.channel === "slack" ? (
+                        <SlackIcon className="size-3 shrink-0" />
+                      ) : undefined
+                    }
+                    trailing={
+                      <button
+                        type="button"
+                        aria-label="Delete chat"
+                        className="text-bruv-tertiary hover:text-bruv-primary opacity-0 transition group-hover/link:opacity-100"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          await deleteThread(thread.id);
+                          if (params?.id === thread.id) router.push("/");
+                        }}
+                      >
+                        <Trash className="size-3.5" />
+                      </button>
+                    }
+                  />
                 ))}
-              </SidebarMenu>
-            </SidebarGroup>
-          );
-        })}
-        {threads.length > 0 && !hasResults && (
-          <p className="text-muted-foreground px-3 py-2 text-xs">
-            no chats match "{query}"
-          </p>
-        )}
-      </SidebarContent>
+              </Sidebar.Section>
+            );
+          })}
+          {threads.length > 0 && !hasResults && (
+            <p className="text-bruv-tertiary px-3 py-2 text-xs">
+              no chats match "{query}"
+            </p>
+          )}
+        </div>
+      </div>
 
-      <SidebarFooter>
+      <div className="pt-1">
         <UserMenu />
-      </SidebarFooter>
-
-      <SidebarRail />
+      </div>
     </Sidebar>
   );
 }
