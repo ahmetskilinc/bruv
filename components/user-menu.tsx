@@ -8,16 +8,7 @@ import {
   ShieldCheck,
 } from "@phosphor-icons/react";
 import { useSession, signOut } from "@/lib/auth-client";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Avatar, DropdownMenu } from "bruv-ui";
 
 export function UserMenu() {
   const { data } = useSession();
@@ -27,58 +18,53 @@ export function UserMenu() {
   const isAdmin = user?.email?.toLowerCase() === "akx9@icloud.com";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="hover:bg-sidebar-accent flex w-full items-center gap-2 rounded-md p-1.5 text-left">
-        <Avatar className="size-7">
-          <AvatarFallback>{initial}</AvatarFallback>
-        </Avatar>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger className="hover:bg-sidebar-accent flex w-full items-center gap-2 rounded-md p-1.5 text-left">
+        <Avatar initials={initial} className="size-7" />
         <span className="truncate text-sm">
           {user?.name ?? user?.email ?? "account"}
         </span>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content align="start" className="w-56">
         {user?.email && (
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="truncate font-normal">
+          <DropdownMenu.Group>
+            <DropdownMenu.Label className="truncate font-normal">
               {user.email}
-            </DropdownMenuLabel>
-          </DropdownMenuGroup>
+            </DropdownMenu.Label>
+          </DropdownMenu.Group>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push("/settings/profile")}>
-            <GearSix data-icon="inline-start" />
+        <DropdownMenu.Separator />
+        <DropdownMenu.Group>
+          <DropdownMenu.Item onClick={() => router.push("/settings/profile")} icon={<GearSix />}>
             profile
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/settings/integrations")}>
-            <PuzzlePiece data-icon="inline-start" />
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onClick={() => router.push("/settings/integrations")} icon={<PuzzlePiece />}>
             integrations
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+          </DropdownMenu.Item>
+        </DropdownMenu.Group>
         {isAdmin && (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/admin")}>
-                <ShieldCheck data-icon="inline-start" />
+            <DropdownMenu.Separator />
+            <DropdownMenu.Group>
+              <DropdownMenu.Item onClick={() => router.push("/admin")} icon={<ShieldCheck />}>
                 admin
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
           </>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem
+        <DropdownMenu.Separator />
+        <DropdownMenu.Group>
+          <DropdownMenu.Item
             onClick={async () => {
               await signOut();
               router.push("/login");
             }}
+            icon={<SignOut />}
           >
-            <SignOut data-icon="inline-start" />
             sign out
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenu.Item>
+        </DropdownMenu.Group>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   );
 }

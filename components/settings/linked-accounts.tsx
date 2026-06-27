@@ -1,17 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { Button, Card, toast } from "bruv-ui";
 import { authClient } from "@/lib/auth-client";
 import { GithubMark } from "@/components/github-mark";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export function LinkedAccounts() {
   const [linked, setLinked] = useState<boolean | null>(null);
@@ -59,13 +51,14 @@ export function LinkedAccounts() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>linked accounts</CardTitle>
-        <CardDescription>
-          link a provider so you can also sign in with it.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <Card.Content>
+        <Card.Header>
+          <div className="text-foreground font-semibold">linked accounts</div>
+          <p className="text-muted-foreground text-sm">
+            link a provider so you can also sign in with it.
+          </p>
+        </Card.Header>
+        <Card.Body>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <GithubMark className="size-5" />
@@ -88,7 +81,8 @@ export function LinkedAccounts() {
             </Button>
           )}
         </div>
-      </CardContent>
+        </Card.Body>
+      </Card.Content>
     </Card>
   );
 }

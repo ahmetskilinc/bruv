@@ -1,11 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Badge, Collapsible } from "bruv-ui";
 import { cn } from "@/lib/utils";
 import type { DynamicToolUIPart, ToolUIPart } from "ai";
 import {
@@ -21,10 +16,10 @@ import { isValidElement } from "react";
 
 import { CodeBlock } from "./code-block";
 
-export type ToolProps = ComponentProps<typeof Collapsible>;
+export type ToolProps = ComponentProps<typeof Collapsible.Root>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
-  <Collapsible
+  <Collapsible.Root
     className={cn("group not-prose mb-4 w-full rounded-md border", className)}
     {...props}
   />
@@ -65,7 +60,7 @@ const statusIcons: Record<ToolPart["state"], ReactNode> = {
 };
 
 export const getStatusBadge = (status: ToolPart["state"]) => (
-  <Badge className="gap-1.5 rounded-full text-xs" variant="secondary">
+  <Badge className="gap-1.5 rounded-full text-xs" variant="neutral">
     {statusIcons[status]}
     {statusLabels[status]}
   </Badge>
@@ -83,7 +78,7 @@ export const ToolHeader = ({
     type === "dynamic-tool" ? toolName : type.split("-").slice(1).join("-");
 
   return (
-    <CollapsibleTrigger
+    <Collapsible.Trigger
       className={cn(
         "flex w-full items-center justify-between gap-4 p-3",
         className
@@ -95,17 +90,17 @@ export const ToolHeader = ({
         <span className="font-medium text-sm">{title ?? derivedName}</span>
         {getStatusBadge(state)}
       </div>
-      <CaretDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-    </CollapsibleTrigger>
+      <CaretDown className="size-4 text-muted-foreground transition-transform group-data-[panel-open]/collapsible:rotate-180" />
+    </Collapsible.Trigger>
   );
 };
 
-export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
+export type ToolContentProps = ComponentProps<typeof Collapsible.Panel>;
 
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
-  <CollapsibleContent
+  <Collapsible.Panel
     className={cn(
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 space-y-4 p-4 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
+      "space-y-4 p-4 text-popover-foreground outline-none",
       className
     )}
     {...props}

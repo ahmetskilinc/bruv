@@ -1,29 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { Button, Card, Dialog, Separator, Textarea, toast } from "bruv-ui";
 import { Clipboard, NotePencil, Trash } from "@phosphor-icons/react";
 import { useMemory } from "@/hooks/use-memory";
 import { MEMORY_CATEGORIES, MEMORY_CATEGORY_LABELS } from "@/shared/types/memory";
 import { MEMORY_EXPORT_PROMPT } from "@/shared/memory/export-prompt";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 export function MemorySection() {
   const { memory, isLoading, importMemory, updateEntry, deleteEntry } = useMemory();
@@ -32,11 +14,12 @@ export function MemorySection() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>memory</CardTitle>
-        <CardDescription>long-term context bruv keeps about you.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <Card.Content>
+        <Card.Header>
+          <div className="text-foreground font-semibold">memory</div>
+          <p className="text-muted-foreground text-sm">long-term context bruv keeps about you.</p>
+        </Card.Header>
+        <Card.Body className="flex flex-col gap-4">
         <div className="flex justify-end">
           <ImportDialog onImport={importMemory} />
         </div>
@@ -54,8 +37,7 @@ export function MemorySection() {
                 {entry && !isEditing && (
                   <div className="flex gap-1">
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="transparent"
                       className="size-7"
                       aria-label="Edit"
                       onClick={() => {
@@ -66,8 +48,7 @@ export function MemorySection() {
                       <NotePencil />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="transparent"
                       className="size-7"
                       aria-label="Delete"
                       onClick={async () => {
@@ -99,7 +80,7 @@ export function MemorySection() {
                     >
                       save
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
+                    <Button size="sm" variant="transparent" onClick={() => setEditing(null)}>
                       cancel
                     </Button>
                   </div>
@@ -113,7 +94,8 @@ export function MemorySection() {
             </div>
           );
         })}
-      </CardContent>
+        </Card.Body>
+      </Card.Content>
     </Card>
   );
 }
@@ -151,17 +133,14 @@ function ImportDialog({
       <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
         import
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>import memory</DialogTitle>
-            <DialogDescription>
-              copy the prompt, run it in another LLM, paste the result here.
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Content>
+          <Dialog.Title>import memory</Dialog.Title>
+          <Dialog.Description>
+            copy the prompt, run it in another LLM, paste the result here.
+          </Dialog.Description>
           <div className="flex flex-col gap-3">
-            <Button variant="outline" size="sm" onClick={copyPrompt}>
-              <Clipboard data-icon="inline-start" />
+            <Button variant="outline" size="sm" iconLeft={<Clipboard />} onClick={copyPrompt}>
               copy export prompt
             </Button>
             <Textarea
@@ -171,13 +150,13 @@ function ImportDialog({
               onChange={(e) => setRaw(e.target.value)}
             />
           </div>
-          <DialogFooter>
+          <Dialog.Footer>
             <Button onClick={add} disabled={busy || !raw.trim()}>
               {busy ? "importing…" : "add to memory"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog.Root>
     </>
   );
 }

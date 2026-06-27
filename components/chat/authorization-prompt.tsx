@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "bruv-ui";
 import { useConnectors } from "@/hooks/use-connectors";
 import type { PendingAuthorization } from "@/hooks/use-chat-session";
-import { Button } from "@/components/ui/button";
+import { Button } from "bruv-ui";
 
 function titleCase(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -68,7 +68,7 @@ export function AuthorizationPrompt({
         </p>
       )}
       <div>
-        <Button size="sm" onClick={onConnect} disabled={busy}>
+        <Button variant="primary" size="sm" onClick={onConnect} disabled={busy}>
           {busy ? "opening…" : `connect ${label}`}
         </Button>
       </div>

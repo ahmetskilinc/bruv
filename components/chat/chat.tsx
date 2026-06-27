@@ -13,9 +13,11 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
-} from "@/components/ui/message-scroller";
-import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker";
-import { Spinner } from "@/components/ui/spinner";
+  Marker,
+  MarkerContent,
+  MarkerIcon,
+  Spinner,
+} from "bruv-ui";
 
 export function Chat({
   threadId,
@@ -60,12 +62,12 @@ export function Chat({
                 </MessageScrollerItem>
               ))}
               {chat.authorization && (
-                <MessageScrollerItem scrollAnchor={false}>
+                <MessageScrollerItem messageId="authorization" scrollAnchor={false}>
                   <AuthorizationPrompt authorization={chat.authorization} />
                 </MessageScrollerItem>
               )}
               {chat.status === "submitted" && (
-                <MessageScrollerItem scrollAnchor={false}>
+                <MessageScrollerItem messageId="status" scrollAnchor={false}>
                   <Marker role="status">
                     <MarkerIcon>
                       <Spinner />
@@ -75,7 +77,7 @@ export function Chat({
                 </MessageScrollerItem>
               )}
               {chat.error && (
-                <MessageScrollerItem scrollAnchor={false}>
+                <MessageScrollerItem messageId="error" scrollAnchor={false}>
                   <p className="text-destructive text-sm">
                     {chat.error.message}
                   </p>

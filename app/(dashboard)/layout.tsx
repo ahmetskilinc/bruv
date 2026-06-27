@@ -6,12 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { getServerSession } from "@/lib/server/session";
 import { listThreadsForUser } from "@/lib/server/threads";
-import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { DashboardShell } from "@/components/dashboard-shell";
 
 export default async function DashboardLayout({
   children,
@@ -31,16 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className="h-svh overflow-hidden">
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-2 md:hidden">
-            <SidebarTrigger />
-            <span className="text-sm font-semibold lowercase">bruv</span>
-          </header>
-          <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
+      <DashboardShell>{children}</DashboardShell>
     </HydrationBoundary>
   );
 }

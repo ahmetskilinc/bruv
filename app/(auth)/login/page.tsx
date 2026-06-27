@@ -2,20 +2,9 @@
 
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import { Button, Card, Input, Label, toast } from "bruv-ui";
 import { signIn, signUp } from "@/lib/auth-client";
 import { GithubMark } from "@/components/github-mark";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 function LoginForm() {
   const router = useRouter();
@@ -54,23 +43,24 @@ function LoginForm() {
 
   return (
     <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="lowercase">bruv</CardTitle>
-        <CardDescription>
-          {mode === "signin" ? "sign in to continue" : "create your account"}
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={onSubmit}>
-        <CardContent className="flex flex-col gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onGithub}
-          >
-            <GithubMark data-icon="inline-start" className="size-4" />
-            continue with github
-          </Button>
+      <Card.Content>
+        <Card.Header>
+          <div className="text-foreground font-semibold lowercase">bruv</div>
+          <p className="text-muted-foreground text-sm">
+            {mode === "signin" ? "sign in to continue" : "create your account"}
+          </p>
+        </Card.Header>
+        <form onSubmit={onSubmit}>
+          <Card.Body className="flex flex-col gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              iconLeft={<GithubMark className="size-4" />}
+              onClick={onGithub}
+            >
+              continue with github
+            </Button>
           <div className="flex items-center gap-3">
             <div className="bg-border h-px flex-1" />
             <span className="text-muted-foreground text-xs">or</span>
@@ -103,22 +93,23 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-        </CardContent>
-        <CardFooter className="mt-4 flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {mode === "signin" ? "sign in" : "sign up"}
-          </Button>
-          <button
-            type="button"
-            className="text-muted-foreground hover:text-foreground text-sm"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin"
-              ? "need an account? sign up"
-              : "have an account? sign in"}
-          </button>
-        </CardFooter>
-      </form>
+          </Card.Body>
+          <Card.Section className="mt-4 flex flex-col gap-3">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {mode === "signin" ? "sign in" : "sign up"}
+            </Button>
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground text-sm"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            >
+              {mode === "signin"
+                ? "need an account? sign up"
+                : "have an account? sign in"}
+            </button>
+          </Card.Section>
+        </form>
+      </Card.Content>
     </Card>
   );
 }

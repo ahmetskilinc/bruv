@@ -1,11 +1,7 @@
 "use client";
 
 import { CaretRight, Wrench } from "@phosphor-icons/react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible } from "bruv-ui";
 import { Markdown } from "../markdown";
 
 // Best-effort extraction of human-readable text from a tool result. MCP
@@ -40,15 +36,15 @@ function extractText(output: unknown): string {
 
 export function ToolResult({ name, output }: { name: string; output: unknown }) {
   return (
-    <Collapsible className="bg-card w-full max-w-md rounded-xl border transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-1 duration-300">
-      <CollapsibleTrigger className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 px-3 py-2 text-xs transition-colors">
+    <Collapsible.Root className="bg-card w-full max-w-md rounded-xl border transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-1 duration-300">
+      <Collapsible.Trigger className="text-muted-foreground hover:text-foreground group flex w-full items-center gap-1.5 px-3 py-2 text-xs transition-colors">
         <Wrench className="size-3.5" />
         <span className="font-mono">used {name}</span>
-        <CaretRight className="ml-auto size-3" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="border-t px-3 py-2 text-xs">
+        <CaretRight className="ml-auto size-3 transition-transform group-data-[panel-open]:rotate-90" />
+      </Collapsible.Trigger>
+      <Collapsible.Panel className="border-t px-3 py-2 text-xs">
         <Markdown>{extractText(output)}</Markdown>
-      </CollapsibleContent>
-    </Collapsible>
+      </Collapsible.Panel>
+    </Collapsible.Root>
   );
 }

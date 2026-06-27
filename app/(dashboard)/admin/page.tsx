@@ -3,13 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/server/admin";
 import { getAdminStats } from "@/lib/server/stats";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "bruv-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -44,30 +38,33 @@ export default async function AdminPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {cards.map((card) => (
           <Card key={card.label}>
-            <CardHeader className="pb-1">
-              <CardDescription className="lowercase">{card.label}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-semibold tabular-nums">
-                {card.value.toLocaleString()}
-              </div>
-              {card.sub && (
-                <p className="text-muted-foreground mt-1 text-xs">{card.sub}</p>
-              )}
-            </CardContent>
+            <Card.Content>
+              <Card.Header className="pb-1">
+                <p className="text-muted-foreground text-sm lowercase">{card.label}</p>
+              </Card.Header>
+              <Card.Body>
+                <div className="text-3xl font-semibold tabular-nums">
+                  {card.value.toLocaleString()}
+                </div>
+                {card.sub && (
+                  <p className="text-muted-foreground mt-1 text-xs">{card.sub}</p>
+                )}
+              </Card.Body>
+            </Card.Content>
           </Card>
         ))}
       </div>
 
       <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-base lowercase">token usage</CardTitle>
-          <CardDescription>
-            via the Vercel AI Gateway reporting API (last 30 days)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!stats.tokens.configured ? (
+        <Card.Content>
+          <Card.Header>
+            <div className="text-foreground font-semibold text-base lowercase">token usage</div>
+            <p className="text-muted-foreground text-sm">
+              via the Vercel AI Gateway reporting API (last 30 days)
+            </p>
+          </Card.Header>
+          <Card.Body>
+            {!stats.tokens.configured ? (
             <p className="text-muted-foreground text-sm">
               Not configured. Create an AI Gateway API key in the Vercel dashboard
               and set{" "}
@@ -109,14 +106,16 @@ export default async function AdminPage() {
               )}
             </div>
           )}
-        </CardContent>
+          </Card.Body>
+        </Card.Content>
       </Card>
 
       <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-base lowercase">all users</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <Card.Content>
+          <Card.Header>
+            <div className="text-foreground font-semibold text-base lowercase">all users</div>
+          </Card.Header>
+          <Card.Body>
           {stats.allUsers.length === 0 ? (
             <p className="text-muted-foreground text-sm">none yet</p>
           ) : (
@@ -139,7 +138,8 @@ export default async function AdminPage() {
               ))}
             </div>
           )}
-        </CardContent>
+          </Card.Body>
+        </Card.Content>
       </Card>
     </div>
   );
