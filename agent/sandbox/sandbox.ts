@@ -54,7 +54,7 @@ function brokeredPolicy(token: string): SandboxNetworkPolicy {
 export default defineSandbox({
   description:
     "Vercel Sandbox dev environment for branch/edit/test/push/PR workflows, with per-user GitHub git auth brokered at the firewall.",
-  backend: vercel({ runtime: "node24", resources: { vcpus: 2 } }),
+  backend: vercel({ resources: { vcpus: 2 } }),
 
   // Template-scoped: runs once when the template is built. Set a stable git
   // identity and non-interactive defaults so git never hangs on a credential

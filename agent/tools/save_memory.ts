@@ -26,7 +26,7 @@ export default defineTool({
       .max(5)
       .describe("Category updates to save together"),
   }),
-  needsApproval: always(),
+  approval: always(),
   async execute({ updates }, ctx) {
     const userId = ctx.session.auth.current?.principalId;
     if (!userId) {

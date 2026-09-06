@@ -14,19 +14,23 @@ import {
 } from "@/components/ui/card";
 
 export function LinkedAccounts() {
-  const [linked, setLinked] = useState<boolean | null>(null);
+  // Better Auth's unlinkAccount takes the account row id, so keep the id around
+  // rather than just a linked/not-linked flag.
+  const [githubAccountId, setGithubAccountId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function refresh() {
     try {
       const { data } = await authClient.listAccounts();
-      setLinked(
-        (data ?? []).some(
-          (a: { providerId: string }) => a.providerId === "github",
-        ),
+      const github = (data ?? []).find(
+        (a: { providerId: string }) => a.providerId === "github",
       );
+      setGithubAccountId(github?.id ?? null);
     } catch {
-      setLinked(false);
+      setGithubAccountId(null);
+    } finally {
+      setLoaded(true);
     }
   }
 
@@ -44,9 +48,12 @@ export function LinkedAccounts() {
   }
 
   async function unlink() {
+    if (!githubAccountId) return;
     setBusy(true);
     try {
-      const res = await authClient.unlinkAccount({ providerId: "github" });
+      const res = await authClient.unlinkAccount({
+        accountId: githubAccountId,
+      });
       if (res.error) throw new Error(res.error.message ?? "Failed to unlink");
       toast.success("github unlinked");
       await refresh();
@@ -71,14 +78,14 @@ export function LinkedAccounts() {
             <GithubMark className="size-5" />
             <div>
               <div className="text-sm">GitHub</div>
-              {linked && (
+              {githubAccountId && (
                 <div className="text-muted-foreground text-xs">linked</div>
               )}
             </div>
           </div>
-          {linked === null ? (
+          {!loaded ? (
             <span className="text-muted-foreground text-xs">…</span>
-          ) : linked ? (
+          ) : githubAccountId ? (
             <Button size="sm" variant="outline" onClick={unlink} disabled={busy}>
               unlink
             </Button>

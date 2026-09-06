@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useEveAgent } from "eve/react";
-import { Client } from "@/lib/eve-client";
 import type { InputResponse } from "eve/client";
 import type { HandleMessageStreamEvent } from "eve/client";
 import { apiFetch } from "@/lib/api";
@@ -70,37 +69,37 @@ export function useChatSession(threadId: string, initialState: ThreadState | nul
   }
 
   // Latest snapshot, kept fresh each render so observe-only callbacks (onError)
-  // and effects can persist the current state without a stale closure.
-  const snapshotRef = useRef<ThreadState>({
-    session: initialState?.session ?? { streamIndex: 0 },
-    events: initialState?.events ?? [],
-  });
+  // and effects can persist the current state without a stale closure. Null
+  // until eve has minted a session cursor, since there is nothing to resume yet.
+  const snapshotRef = useRef<ThreadState | null>(initialState);
 
-  // Own the client session so we can set `preserveCompletedSessions`. Without
-  // it, eve resets the client-side session after every `session.completed`
-  // boundary, so the next turn starts a FRESH server conversation — which
-  // reuses the same `turn_0` ids and makes the new turn overwrite the previous
-  // messages in the projection. A multi-turn chat must keep the session.
-  const [session] = useState(() =>
-    new Client({ host: "", preserveCompletedSessions: true }).session(
-      initialState?.session,
-    ),
-  );
+  function persistSnapshot() {
+    if (snapshotRef.current) persist(snapshotRef.current);
+  }
 
+  // Sessions are ID-addressed, so passing the stored cursor keeps every turn on
+  // the same server conversation across reloads. `resume` replays the durable
+  // transcript and follows a turn that was still in flight when we left.
   const agent = useEveAgent({
-    session,
+    initialSession: initialState?.session,
+    resume: Boolean(initialState?.session),
     initialEvents: initialState?.events as
       | readonly HandleMessageStreamEvent[]
       | undefined,
     onFinish(snapshot) {
+      // No cursor means there is nothing resumable to persist yet.
+      if (!snapshot.session) return;
+
       persist({ session: snapshot.session, events: [...snapshot.events] });
     },
     onError() {
-      persist(snapshotRef.current);
+      persistSnapshot();
     },
   });
 
-  snapshotRef.current = { session: agent.session, events: [...agent.events] };
+  snapshotRef.current = agent.session
+    ? { session: agent.session, events: [...agent.events] }
+    : null;
 
   const authorization = pendingAuthorization(agent.events);
 
@@ -108,7 +107,7 @@ export function useChatSession(threadId: string, initialState: ThreadState | nul
   // too — otherwise an interrupted turn is lost on reload.
   useEffect(() => {
     if (authorization) {
-      persist(snapshotRef.current);
+      persistSnapshot();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorization?.name]);
@@ -125,11 +124,11 @@ export function useChatSession(threadId: string, initialState: ThreadState | nul
       }).catch(() => undefined);
     }
 
-    await agent.send({ message: trimmed });
+    await agent.send(trimmed);
   }
 
   async function respond(responses: InputResponse[]) {
-    await agent.send({ inputResponses: responses });
+    await agent.respond(responses);
   }
 
   return {
@@ -140,6 +139,6 @@ export function useChatSession(threadId: string, initialState: ThreadState | nul
     authorization,
     sendMessage,
     respond,
-    stop: agent.stop,
+    stop: agent.cancel,
   };
 }

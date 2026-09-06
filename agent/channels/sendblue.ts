@@ -1,4 +1,4 @@
-import type { SendFn, SendOptions } from "eve/channels";
+import type { ChannelFrom, ChannelSendOptions } from "eve/channels";
 import { defineChannel, POST } from "eve/channels";
 import type { SendblueMessagePayload } from "chat-adapter-sendblue";
 import { agent } from "../../shared/agent.js";
@@ -81,9 +81,9 @@ function threadIdForState(
 const pendingInputByThread = new Map<string, PendingInputRequest[]>();
 
 interface InflightSend {
-  send: SendFn<SendblueChannelState>;
-  auth: SendOptions<SendblueChannelState>["auth"];
-  continuationToken: string;
+  from: ChannelFrom<SendblueChannelState>;
+  auth: ChannelSendOptions<SendblueChannelState>["auth"];
+  address: string;
   state: SendblueChannelState;
 }
 
@@ -114,8 +114,8 @@ function denyResponses(requests: readonly PendingInputRequest[]) {
 async function resolvePendingInput(
   threadId: string,
   text: string,
-  send: SendFn<SendblueChannelState>,
-  sendOptions: SendOptions<SendblueChannelState>,
+  from: ChannelFrom<SendblueChannelState>,
+  sendOptions: ChannelSendOptions<SendblueChannelState>,
 ) {
   const pending = pendingInputByThread.get(threadId);
   if (!pending?.length) {
@@ -139,19 +139,17 @@ async function resolvePendingInput(
 
   try {
     inflightSend = {
-      send,
+      from,
       auth: sendOptions.auth,
-      continuationToken: sendOptions.continuationToken,
+      address: threadId,
       state: sendOptions.state,
     };
-    await send(
-      {
-        inputResponses: pending.map((request) => ({
-          requestId: request.requestId,
-          optionId: approval,
-        })),
-      },
-      sendOptions,
+    await from(threadId).respond(
+      pending.map((request) => ({
+        requestId: request.requestId,
+        optionId: approval,
+      })),
+      { auth: sendOptions.auth, state: sendOptions.state },
     );
   } finally {
     inflightSend = null;
@@ -179,7 +177,7 @@ function extractMediaUrl(payload: SendblueMessagePayload): string {
 
 async function dispatchInbound(
   payload: SendblueMessagePayload,
-  send: SendFn<SendblueChannelState>,
+  from: ChannelFrom<SendblueChannelState>,
 ) {
   const sendblue = getSendblueAdapter();
   const threadId = threadIdFromPayload(payload, sendblue);
@@ -223,7 +221,6 @@ async function dispatchInbound(
 
   const sendOptions = {
     auth,
-    continuationToken: threadId,
     state: {
       threadId,
       contactNumber,
@@ -235,17 +232,17 @@ async function dispatchInbound(
   };
 
   try {
-    const blocked = await resolvePendingInput(threadId, text, send, sendOptions);
+    const blocked = await resolvePendingInput(threadId, text, from, sendOptions);
     if (blocked) {
       return;
     }
 
-    inflightSend = { send, auth, continuationToken: threadId, state: sendOptions.state };
+    inflightSend = { from, auth, address: threadId, state: sendOptions.state };
 
     if (mediaUrl) {
       // When an image is present, send as a multimodal parts array.
       // Context strings are prepended as text parts so channel instructions stay intact.
-      await send(
+      await from(threadId).send(
         [
           ...turnContext.map((ctx) => ({ type: "text" as const, text: ctx })),
           ...(text ? [{ type: "text" as const, text }] : []),
@@ -254,13 +251,7 @@ async function dispatchInbound(
         sendOptions,
       );
     } else {
-      await send(
-        {
-          message: text,
-          context: turnContext,
-        },
-        sendOptions,
-      );
+      await from(threadId).send(text, { ...sendOptions, context: turnContext });
     }
   } catch (error) {
     console.error("[sendblue] agent send failed", error);
@@ -298,7 +289,7 @@ export default defineChannel<SendblueChannelState, SendblueChannelContext>({
   },
 
   routes: [
-    POST(WEBHOOK_ROUTE, async (request, { send, waitUntil }) => {
+    POST(WEBHOOK_ROUTE, async (request, { from, waitUntil }) => {
       if (!isSendblueConfigured()) {
         return new Response("Sendblue is not configured", { status: 503 });
       }
@@ -344,7 +335,7 @@ export default defineChannel<SendblueChannelState, SendblueChannelContext>({
         return new Response("OK", { status: 200 });
       }
 
-      waitUntil(dispatchInbound(payload, send));
+      waitUntil(dispatchInbound(payload, from));
       return new Response("OK", { status: 200 });
     }),
   ],
@@ -422,13 +413,9 @@ export default defineChannel<SendblueChannelState, SendblueChannelContext>({
           `Memory saves need the web profile on iMessage — skipping. Edit at ${profileSettingsUrl()}.`,
         );
         try {
-          await inflightSend.send(
-            { inputResponses: denyResponses(pending) },
-            {
-              auth: inflightSend.auth,
-              continuationToken: inflightSend.continuationToken,
-              state: channel.state,
-            },
+          await inflightSend.from(inflightSend.address).respond(
+            denyResponses(pending),
+            { auth: inflightSend.auth, state: channel.state },
           );
         } catch (error) {
           console.error("[sendblue] save_memory auto-deny failed", error);

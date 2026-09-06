@@ -13,6 +13,11 @@ function parseThreadState(value: string | null): ThreadState | null {
     if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.events)) {
       return null;
     }
+    // Cursors persisted before eve's session-state change lack a `sessionId`
+    // and are no longer resumable — drop them so the thread starts fresh.
+    if (typeof parsed.session?.sessionId !== "string" || !parsed.session.sessionId) {
+      return null;
+    }
     return parsed;
   } catch {
     return null;
@@ -23,14 +28,14 @@ function serializeThreadState(state: ThreadState | undefined) {
   return state ? JSON.stringify(state) : null;
 }
 
-function mergeThreadState(existing: ThreadState | null, incoming: ThreadState): ThreadState {
-  const session = incoming.session;
-
+// The client sends a complete cursor + event prefix on every turn, so the
+// incoming state replaces the stored one; this just strips it to the persisted
+// shape.
+function normalizeThreadState(incoming: ThreadState): ThreadState {
   return {
     session: {
-      sessionId: session.sessionId ?? existing?.session.sessionId,
-      continuationToken: session.continuationToken ?? existing?.session.continuationToken,
-      streamIndex: session.streamIndex,
+      sessionId: incoming.session.sessionId,
+      streamIndex: incoming.session.streamIndex,
     },
     events: incoming.events,
   };
@@ -163,7 +168,7 @@ export async function upsertSlackThreadForUser(
         .set({
           ...(input.title !== undefined ? { title: truncateThreadTitle(input.title) } : {}),
           ...(input.state !== undefined
-            ? { state: serializeThreadState(mergeThreadState(existing.state, input.state)) }
+            ? { state: serializeThreadState(normalizeThreadState(input.state)) }
             : {}),
         })
         .where(eq(schema.threads.id, existing.id));
@@ -194,7 +199,7 @@ export async function updateThreadForUser(
     .set({
       ...(patch.title !== undefined ? { title: truncateThreadTitle(patch.title) } : {}),
       ...(patch.state !== undefined
-        ? { state: serializeThreadState(mergeThreadState(existing.state, patch.state)) }
+        ? { state: serializeThreadState(normalizeThreadState(patch.state)) }
         : {}),
     })
     .where(and(eq(schema.threads.id, id), eq(schema.threads.userId, userId)));

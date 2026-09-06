@@ -10,9 +10,10 @@ export interface ThreadSummary {
   slackThreadTs?: string | null;
 }
 
+// Mirrors eve's `ClientSessionState` (eve/client). Kept as a structural type so
+// server code can persist it without importing the eve client bundle.
 export interface EveSessionCursor {
-  sessionId?: string;
-  continuationToken?: string;
+  sessionId: string;
   streamIndex: number;
 }
 
