@@ -255,6 +255,13 @@ async function dispatchInbound(
     }
   } catch (error) {
     console.error("[sendblue] agent send failed", error);
+    // TEMP DIAGNOSTIC: surface the send failure into the thread while we debug
+    // silent prod delivery failures. Remove once resolved.
+    const detail =
+      error instanceof Error
+        ? `${error.name}: ${error.message}\n${error.stack?.slice(0, 800) ?? ""}`
+        : String(error);
+    await postToThread(threadId, `⚠️ send failed: ${detail}`);
   } finally {
     inflightSend = null;
   }
