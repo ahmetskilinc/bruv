@@ -239,6 +239,9 @@ async function dispatchInbound(
 
     inflightSend = { from, auth, address: threadId, state: sendOptions.state };
 
+    // TEMP DIAGNOSTIC
+    await postToThread(threadId, `🔎 dispatching to session (thread=${threadId})`);
+
     if (mediaUrl) {
       // When an image is present, send as a multimodal parts array.
       // Context strings are prepended as text parts so channel instructions stay intact.
@@ -251,7 +254,13 @@ async function dispatchInbound(
         sendOptions,
       );
     } else {
-      await from(threadId).send(text, { ...sendOptions, context: turnContext });
+      const session = await from(threadId).send(text, {
+        ...sendOptions,
+        context: turnContext,
+      });
+      // TEMP DIAGNOSTIC
+      const sid = (session as { sessionId?: string } | undefined)?.sessionId;
+      await postToThread(threadId, `🔎 send accepted, session=${sid ?? "?"}`);
     }
   } catch (error) {
     console.error("[sendblue] agent send failed", error);
