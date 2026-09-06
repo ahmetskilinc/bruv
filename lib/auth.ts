@@ -11,6 +11,7 @@ const trustedOrigins = [
   "https://www.bruv.chat",
   "https://bruv-sandy.vercel.app",
   "http://localhost:3000",
+  "http://192.168.0.42:3000",
 ];
 
 // GitHub social login. Only enabled once the OAuth app credentials are set, so
