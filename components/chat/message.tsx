@@ -36,9 +36,11 @@ import { SourcesCard, type WebSearchOutput } from "./tool/sources-card";
 import { DiffCard } from "./tool/diff-card";
 import { FlightListCard } from "./tool/flight-list-card";
 import { HotelListCard } from "./tool/hotel-list-card";
+import { PackageCard } from "./tool/package-card";
 import type { ShowDiffOutput } from "@/shared/tools/show_diff";
 import type { FlightSearchOutput } from "@/shared/tools/flights";
 import type { HotelSearchOutput } from "@/shared/tools/hotels";
+import type { TripPlanOutput } from "@/shared/tools/package";
 import { ToolResult } from "./tool/tool-result";
 import { ToolError } from "./tool/tool-error";
 
@@ -210,6 +212,10 @@ function ToolPart({
       const out = part.output as WebSearchOutput & { error?: string };
       return out?.error ? null : <SourcesCard output={out} />;
     }
+    if (name === "plan_trip") {
+      const out = part.output as TripPlanOutput & { error?: string };
+      return out?.error ? <ToolError message={out.error} /> : <PackageCard output={out} />;
+    }
     if (name === "find_flights") {
       const out = part.output as FlightSearchOutput & { error?: string };
       return out?.error ? <ToolError message={out.error} /> : <FlightListCard output={out} />;
@@ -269,6 +275,7 @@ const RUNNING_LABELS: Record<string, string> = {
   save_memory: "saving to memory",
   show_diff: "reading the diff",
   open_pull_request: "opening the pr",
+  plan_trip: "planning the trip",
   find_flights: "searching flights",
   find_hotels: "finding places to stay",
 };

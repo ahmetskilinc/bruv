@@ -2,71 +2,24 @@
 
 import { AirplaneTakeoff, ArrowRight, ArrowSquareOut, Leaf } from "@phosphor-icons/react";
 import type { FlightOption, FlightSearchOutput } from "@/shared/tools/flights";
+import {
+  dayOffset,
+  formatDay,
+  formatDuration,
+  formatPrice,
+  stopsLabel,
+  timeOf,
+} from "./travel-format";
 import { cn } from "@/lib/utils";
 
 const MAX_SHOWN = 5;
-
-function formatDuration(minutes: number) {
-  if (!minutes) return "";
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  return hours ? `${hours}h ${rest ? `${rest}m` : ""}`.trim() : `${rest}m`;
-}
-
-/** "2026-10-12 07:15" -> "07:15". Falls back to the raw string if unparsed. */
-function timeOf(value: string) {
-  const match = /\d{2}:\d{2}/u.exec(value);
-  return match?.[0] ?? value;
-}
-
-function dateOf(value: string) {
-  return value.slice(0, 10);
-}
-
-/** Google shows "+1" when the flight lands on a later calendar day. */
-function dayOffset(option: FlightOption) {
-  const first = option.segments.at(0);
-  const last = option.segments.at(-1);
-  if (!first?.departsAt || !last?.arrivesAt) return 0;
-  const from = new Date(`${dateOf(first.departsAt)}T00:00:00Z`).getTime();
-  const to = new Date(`${dateOf(last.arrivesAt)}T00:00:00Z`).getTime();
-  if (Number.isNaN(from) || Number.isNaN(to)) return 0;
-  return Math.round((to - from) / 86_400_000);
-}
-
-function formatPrice(amount: number, currency: string) {
-  try {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `${amount} ${currency}`;
-  }
-}
-
-function formatDay(value: string) {
-  const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-GB", {
-    timeZone: "UTC",
-    day: "numeric",
-    month: "short",
-  });
-}
-
-function stopsLabel(stops: number) {
-  if (stops === 0) return "direct";
-  return `${stops} stop${stops === 1 ? "" : "s"}`;
-}
 
 function FlightRow({ option }: { option: FlightOption }) {
   const first = option.segments.at(0);
   const last = option.segments.at(-1);
   if (!first || !last) return null;
 
-  const plus = dayOffset(option);
+  const plus = dayOffset(first.departsAt, last.arrivesAt);
   const airlines = [...new Set(option.segments.map((segment) => segment.airline))];
   const via = option.layovers.map((layover) => layover.code).filter(Boolean);
 
