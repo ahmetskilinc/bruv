@@ -133,3 +133,123 @@
     @apply font-sans;
     }
 }
+
+/*
+ * Markdown inside an assistant bubble.
+ *
+ * Streamdown ships its lists as `list-inside list-disc`, which drops the marker
+ * into the text flow: bullets sit flush against the bubble's padding and
+ * wrapped lines run back under the marker instead of indenting. These rules
+ * restore a hanging indent and give the rest of the markdown some rhythm.
+ *
+ * Deliberately NOT inside `@layer components` — Tailwind orders layers
+ * `theme, base, components, utilities`, so a layered rule loses to Streamdown's
+ * `list-inside` utility no matter how specific it is. Unlayered CSS outranks
+ * every layer, which is what makes these overrides stick. Don't wrap this in a
+ * layer to tidy it up; it will silently stop working.
+ *
+ * The typography plugin isn't installed and this is small enough not to warrant
+ * it, so it's a hand-rolled prose.
+ */
+.chat-prose {
+  /* Rhythm between blocks. */
+  & > * + * {
+    margin-block-start: calc(var(--spacing) * 3);
+  }
+
+  /* Hanging indent: marker in the gutter, wrapped text aligned to the first line. */
+  & ul,
+  & ol {
+    list-style-position: outside;
+    padding-inline-start: calc(var(--spacing) * 5);
+    margin-block: calc(var(--spacing) * 2);
+  }
+
+  & ul {
+    list-style-type: disc;
+  }
+
+  & ol {
+    list-style-type: decimal;
+  }
+
+  & li {
+    padding-inline-start: calc(var(--spacing) * 1);
+  }
+
+  & li + li {
+    margin-block-start: calc(var(--spacing) * 1.5);
+  }
+
+  /* Nested lists tuck in and switch marker so levels stay legible. */
+  & li > ul,
+  & li > ol {
+    margin-block: calc(var(--spacing) * 1.5);
+  }
+
+  & li > ul {
+    list-style-type: circle;
+  }
+
+  /* Muted markers keep the text the loudest thing in the bubble. */
+  & li::marker {
+    color: var(--muted-foreground);
+  }
+
+  & p + p {
+    margin-block-start: calc(var(--spacing) * 3);
+  }
+
+  /* Headings in a chat reply are emphasis, not document structure. */
+  & :is(h1, h2, h3, h4) {
+    font-weight: 600;
+    line-height: 1.3;
+    margin-block: calc(var(--spacing) * 4) calc(var(--spacing) * 2);
+  }
+
+  & :is(h1, h2) {
+    font-size: 1.0625em;
+  }
+
+  & :is(h3, h4) {
+    font-size: 1em;
+  }
+
+  & blockquote {
+    border-inline-start: 2px solid var(--border);
+    padding-inline-start: calc(var(--spacing) * 3);
+    color: var(--muted-foreground);
+    margin-block: calc(var(--spacing) * 3);
+  }
+
+  & hr {
+    border-color: var(--border);
+    margin-block: calc(var(--spacing) * 4);
+  }
+
+  & a {
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in oklch, currentColor, transparent 60%);
+  }
+
+  & a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Tables can out-width the bubble; scroll rather than clip. */
+  & table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /* First/last child spacing is the bubble's padding, not ours. */
+  & > :first-child {
+    margin-block-start: 0;
+  }
+
+  & > :last-child {
+    margin-block-end: 0;
+  }
+}

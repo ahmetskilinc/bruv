@@ -104,7 +104,7 @@ const streamdownPlugins = { cjk, code };
 const Response = memo(
   ({ text }: { text: string }) => (
     <Streamdown
-      className="size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+      className="chat-prose size-full"
       plugins={streamdownPlugins}
     >
       {text}
