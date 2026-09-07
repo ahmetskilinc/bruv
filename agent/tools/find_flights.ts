@@ -33,6 +33,20 @@ const NONSTOP_ONLY = 1;
 // Keep the payload (and the model's context) bounded — nobody reads past this.
 const MAX_OPTIONS = 8;
 
+// Google Flights takes real airport codes (or /m/ kgmids), NOT city/metro codes
+// — LON and NYC return zero results while still costing a search. Multiple
+// airports are comma-separated instead.
+const AIRPORTS_PATTERN = /^[A-Za-z]{3}(?:\s*,\s*[A-Za-z]{3})*$/u;
+const MAX_AIRPORTS = 4;
+
+function normalizeAirports(value: string) {
+  const codes = value
+    .split(",")
+    .map((code) => code.trim().toUpperCase())
+    .filter(Boolean);
+  return [...new Set(codes)].slice(0, MAX_AIRPORTS);
+}
+
 interface RawAirport {
   name?: string;
   id?: string;
@@ -123,16 +137,14 @@ export default defineTool({
   inputSchema: z.object({
     from: z
       .string()
-      .min(3)
-      .max(3)
+      .regex(AIRPORTS_PATTERN, "must be 3-letter IATA airport codes, comma-separated")
       .describe(
-        "Origin as a 3-letter IATA code. Prefer the metro code when a city has several airports: LON (all London), NYC, PAR, TYO, MIL, ROM. Otherwise the airport code, e.g. LHR, IST, LIS.",
+        "Origin AIRPORT codes (IATA, 3 letters). City/metro codes like LON or NYC do NOT work — to cover a whole city, comma-separate its airports: 'LHR,LGW,STN,LTN' for London, 'JFK,EWR,LGA' for New York, 'CDG,ORY' for Paris, 'IST,SAW' for Istanbul.",
       ),
     to: z
       .string()
-      .min(3)
-      .max(3)
-      .describe("Destination as a 3-letter IATA or metro code, same rules as `from`."),
+      .regex(AIRPORTS_PATTERN, "must be 3-letter IATA airport codes, comma-separated")
+      .describe("Destination airport codes, same rules as `from`."),
     departDate: z
       .string()
       .describe("Outbound date as YYYY-MM-DD. Must be today or later."),
@@ -181,12 +193,17 @@ export default defineTool({
       .describe("ISO currency code to quote prices in, e.g. GBP, EUR, USD."),
   }),
   async execute(input) {
-    const from = input.from.trim().toUpperCase();
-    const to = input.to.trim().toUpperCase();
+    const fromCodes = normalizeAirports(input.from);
+    const toCodes = normalizeAirports(input.to);
+    const from = fromCodes.join(",");
+    const to = toCodes.join(",");
     const currency = input.currency.trim().toUpperCase();
 
-    if (from === to) {
-      return { error: "Origin and destination are the same airport." };
+    if (fromCodes.length === 0 || toCodes.length === 0) {
+      return { error: "Need at least one 3-letter airport code on each side." };
+    }
+    if (fromCodes.some((code) => toCodes.includes(code))) {
+      return { error: "Origin and destination share an airport." };
     }
     if (!isValidDate(input.departDate)) {
       return { error: `"${input.departDate}" isn't a valid YYYY-MM-DD date.` };
@@ -221,6 +238,7 @@ export default defineTool({
     });
 
     if (!result.ok) {
+      console.error(`[find_flights] search failed (${from} -> ${to} on ${input.departDate}): ${result.error}`);
       return { error: result.error };
     }
 
@@ -234,8 +252,9 @@ export default defineTool({
       .slice(0, MAX_OPTIONS);
 
     if (options.length === 0) {
+      console.warn(`[find_flights] zero results for ${from} -> ${to} on ${input.departDate}`);
       return {
-        error: `No flights found from ${from} to ${to} on ${input.departDate}. Try nearby dates, a metro code like LON, or dropping the non-stop filter.`,
+        error: `No flights found from ${from} to ${to} on ${input.departDate}. Check the airport codes are real IATA codes, then try nearby dates, adding the city's other airports, or dropping the non-stop filter.`,
       };
     }
 

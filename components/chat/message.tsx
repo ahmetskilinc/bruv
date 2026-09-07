@@ -40,6 +40,7 @@ import type { ShowDiffOutput } from "@/shared/tools/show_diff";
 import type { FlightSearchOutput } from "@/shared/tools/flights";
 import type { HotelSearchOutput } from "@/shared/tools/hotels";
 import { ToolResult } from "./tool/tool-result";
+import { ToolError } from "./tool/tool-error";
 
 export function ChatMessage({
   message,
@@ -211,11 +212,11 @@ function ToolPart({
     }
     if (name === "find_flights") {
       const out = part.output as FlightSearchOutput & { error?: string };
-      return out?.error ? null : <FlightListCard output={out} />;
+      return out?.error ? <ToolError message={out.error} /> : <FlightListCard output={out} />;
     }
     if (name === "find_hotels") {
       const out = part.output as HotelSearchOutput & { error?: string };
-      return out?.error ? null : <HotelListCard output={out} />;
+      return out?.error ? <ToolError message={out.error} /> : <HotelListCard output={out} />;
     }
     if (name === "show_diff") {
       const out = part.output as ShowDiffOutput & { error?: string };

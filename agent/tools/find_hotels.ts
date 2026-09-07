@@ -149,6 +149,7 @@ export default defineTool({
     });
 
     if (!result.ok) {
+      console.error(`[find_hotels] search failed (${input.location} ${input.checkIn}..${input.checkOut}): ${result.error}`);
       return { error: result.error };
     }
 
@@ -157,6 +158,7 @@ export default defineTool({
       .slice(0, MAX_OPTIONS);
 
     if (options.length === 0) {
+      console.warn(`[find_hotels] zero results for ${input.location} ${input.checkIn}..${input.checkOut}`);
       return {
         error: `No stays found in ${input.location} for those dates. Try a wider area, different dates, or dropping the rating and price filters.`,
       };
