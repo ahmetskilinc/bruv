@@ -169,6 +169,29 @@ function Part({
   return null;
 }
 
+/** Tools signal failure by returning `{ error }` rather than throwing. */
+function errorOf(output: unknown): string | undefined {
+  const value = (output as { error?: unknown } | null | undefined)?.error;
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+// Tool name -> card. Adding a tool is one line here; the shared error check in
+// ToolPart means a new entry cannot forget to handle its own failure case.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- each entry
+// narrows its own output; the table itself is heterogeneous by nature.
+const TOOL_CARDS: Record<string, (output: any) => React.ReactNode> = {
+  weather: (output: WeatherOutput) => <WeatherCard output={output} />,
+  list_repos: (output: RepoListOutput) => <RepoListCard output={output} />,
+  list_prs: (output: PrListOutput) => <PrListCard output={output} />,
+  generate_image: (output: ImageOutput) => <ImageCard output={output} />,
+  fortnite_stats: (output: FortniteOutput) => <FortniteCard output={output} />,
+  web_search: (output: WebSearchOutput) => <SourcesCard output={output} />,
+  plan_trip: (output: TripPlanOutput) => <PackageCard output={output} />,
+  find_flights: (output: FlightSearchOutput) => <FlightListCard output={output} />,
+  find_hotels: (output: HotelSearchOutput) => <HotelListCard output={output} />,
+  show_diff: (output: ShowDiffOutput) => <DiffCard output={output} />,
+};
+
 function ToolPart({
   part,
   onRespond,
@@ -192,52 +215,27 @@ function ToolPart({
   }
 
   if (part.state === "output-available") {
-    if (name === "weather") {
-      return <WeatherCard output={part.output as WeatherOutput} />;
+    // One error check for every tool. Previously each branch decided for itself,
+    // which is how web_search and fortnite_stats ended up rendering `null`, and
+    // how list_repos/list_prs ended up feeding an {error} object into a card
+    // that then displayed "undefined repositories".
+    const failure = errorOf(part.output);
+    if (failure) {
+      return <ToolError message={failure} />;
     }
-    if (name === "list_repos") {
-      return <RepoListCard output={part.output as RepoListOutput} />;
-    }
-    if (name === "list_prs") {
-      return <PrListCard output={part.output as PrListOutput} />;
-    }
-    if (name === "generate_image") {
-      return <ImageCard output={part.output as ImageOutput} />;
-    }
-    if (name === "fortnite_stats") {
-      const out = part.output as FortniteOutput & { error?: string };
-      return out?.error ? null : <FortniteCard output={out} />;
-    }
-    if (name === "web_search") {
-      const out = part.output as WebSearchOutput & { error?: string };
-      return out?.error ? null : <SourcesCard output={out} />;
-    }
-    if (name === "plan_trip") {
-      const out = part.output as TripPlanOutput & { error?: string };
-      return out?.error ? <ToolError message={out.error} /> : <PackageCard output={out} />;
-    }
-    if (name === "find_flights") {
-      const out = part.output as FlightSearchOutput & { error?: string };
-      return out?.error ? <ToolError message={out.error} /> : <FlightListCard output={out} />;
-    }
-    if (name === "find_hotels") {
-      const out = part.output as HotelSearchOutput & { error?: string };
-      return out?.error ? <ToolError message={out.error} /> : <HotelListCard output={out} />;
-    }
-    if (name === "show_diff") {
-      const out = part.output as ShowDiffOutput & { error?: string };
-      return out?.error ? (
-        <ToolResult name={name} output={part.output} />
-      ) : (
-        <DiffCard output={out} />
-      );
-    }
-    return <ToolResult name={name} output={part.output} />;
+
+    const card = TOOL_CARDS[name];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the table
+    // is keyed by tool name; each entry knows its own output shape.
+    return card ? card(part.output as any) : <ToolResult name={name} output={part.output} />;
   }
 
   const isError = part.state === "output-error";
   const isDenied = part.state === "output-denied";
   const running = !isError && !isDenied;
+  // eve carries the reason on the part; without these a thrown tool shows only
+  // "weather failed", and a policy-denied call shows only "save_memory skipped".
+  const detail = isError ? part.errorText : isDenied ? part.approval?.reason : undefined;
   const label = isError
     ? `${name} failed`
     : isDenied
@@ -245,20 +243,23 @@ function ToolPart({
       : `${RUNNING_LABELS[name] ?? name}…`;
 
   return (
-    <div
-      className={cn(
-        "animate-in fade-in flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs duration-300",
-        isError
-          ? "text-destructive border-destructive/30"
-          : "text-muted-foreground bg-muted/40"
-      )}
-    >
-      {running ? (
-        <ArrowsClockwise className="text-brand size-3.5 animate-spin" />
-      ) : (
-        <Wrench className="size-3.5" />
-      )}
-      <span>{label}</span>
+    <div className="animate-in fade-in flex flex-col items-start gap-1 duration-300">
+      <div
+        className={cn(
+          "flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs",
+          isError
+            ? "text-destructive border-destructive/30"
+            : "text-muted-foreground bg-muted/40"
+        )}
+      >
+        {running ? (
+          <ArrowsClockwise className="text-brand size-3.5 animate-spin" />
+        ) : (
+          <Wrench className="size-3.5" />
+        )}
+        <span>{label}</span>
+      </div>
+      {detail && <ToolError message={detail} />}
     </div>
   );
 }

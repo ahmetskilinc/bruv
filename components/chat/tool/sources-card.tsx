@@ -18,7 +18,17 @@ function domainOf(url: string) {
 
 export function SourcesCard({ output }: { output: WebSearchOutput }) {
   const results = output.results ?? [];
-  if (results.length === 0) return null;
+
+  // A search can succeed with an answer but no citable sources. Rendering
+  // nothing at all made that look like the tool had silently failed.
+  if (results.length === 0) {
+    return (
+      <div className="text-muted-foreground flex w-fit items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs animate-in fade-in duration-300">
+        <Globe className="size-3.5 shrink-0" />
+        <span>searched the web · no sources to cite</span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card w-full max-w-md rounded-xl border p-1 transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-1 duration-300">

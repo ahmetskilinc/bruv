@@ -246,7 +246,10 @@ async function dispatchInbound(
         [
           ...turnContext.map((ctx) => ({ type: "text" as const, text: ctx })),
           ...(text ? [{ type: "text" as const, text }] : []),
-          { type: "image" as const, image: new URL(mediaUrl) },
+          // `{type:"image"}` is deprecated in AI SDK 7 — a `file` part with an
+          // image mediaType is the supported shape. Sendblue's media_url does
+          // not declare a subtype, so the bare top-level segment is honest.
+          { type: "file" as const, data: new URL(mediaUrl), mediaType: "image" },
         ],
         sendOptions,
       );

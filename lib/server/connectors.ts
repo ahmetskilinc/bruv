@@ -1,36 +1,7 @@
 import type { ConnectorDef } from "@/shared/types/connector";
-import {
-  fetchLinearIssuesViaGraphql,
-  fetchLinearIssuesViaMcp,
-} from "@/lib/server/linear-mcp";
 import { createError } from "@/lib/server/http";
 
 export const connectors: ConnectorDef[] = [
-  {
-    id: "linear",
-    name: "Linear",
-    description: "Issues, projects, cycles, and comments in your Linear workspace.",
-    connector: "mcp.linear.app/linear",
-    connectionName: "linear",
-    icon: "i-simple-icons-linear",
-    scopes: [],
-    test: {
-      label: "List my issues",
-      run: async (token) => {
-        const mcpResult = await fetchLinearIssuesViaMcp(token);
-        if (mcpResult.ok) {
-          return mcpResult.results;
-        }
-
-        const graphqlResult = await fetchLinearIssuesViaGraphql(token);
-        if (graphqlResult.ok) {
-          return graphqlResult.results;
-        }
-
-        throw new Error(mcpResult.error ?? graphqlResult.error ?? "Linear test failed");
-      },
-    },
-  },
   {
     id: "github",
     name: "GitHub",

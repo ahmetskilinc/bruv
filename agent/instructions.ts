@@ -9,8 +9,8 @@ const IMESSAGE_INSTRUCTIONS = `
 # iMessage (Sendblue)
 
 - this conversation is over imessage. there is no browser ui for tool approvals here.
-- answer directly. use github, weather, flight/hotel search, linear, and other
-  tools when relevant.
+- answer directly. use github, weather, flight/hotel search, and other tools
+  when relevant.
 - **tool results do not render as cards here.** when you search flights or hotels,
   write the top few options out as text with the prices and times — otherwise the
   user sees nothing.

@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { always } from "eve/tools/approval";
 import { z } from "zod";
-import { MEMORY_CATEGORIES } from "../lib/memory-categories.js";
+import { MEMORY_CATEGORIES } from "../../shared/types/memory.js";
 import { saveMemoryRemote } from "../lib/memory-internal.js";
 
 const updateSchema = z.object({

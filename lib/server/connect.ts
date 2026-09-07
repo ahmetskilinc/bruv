@@ -48,7 +48,7 @@ function formatSetupHint(def: ConnectorDef, reason: "missing" | "not_linked") {
   if (reason === "missing") {
     return [
       "Create the connector, then attach it to this project:",
-      "vercel connect create mcp.linear.app --name linear",
+      `vercel connect create ${def.connector.split("/")[0]} --name ${def.id}`,
       `vercel connect attach ${def.connector}`,
       "Update the connector UID in lib/server/connectors.ts if it differs from `vercel connect list`.",
     ].join("\n");

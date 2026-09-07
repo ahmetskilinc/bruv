@@ -13,7 +13,7 @@ import { Composer } from "@/components/chat/composer";
 
 const SUGGESTIONS = [
   { label: "show me my open PRs", icon: CodeBlock },
-  { label: "what's on my Linear?", icon: ListBullets },
+  { label: "plan me a weekend away", icon: ListBullets },
   { label: "weather in london", icon: Cloud },
   { label: "draw me something stupid", icon: Sparkle },
 ];
