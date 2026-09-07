@@ -14,6 +14,9 @@ function appSession(): AuthFn<Request> {
 
     return {
       attributes: {
+        // Read back by agent/lib/approval.ts — ApprovalContext carries the
+        // session auth but not the channel, so each channel stamps its own.
+        channel: "web",
         email: session.user.email,
         name: session.user.name,
       },

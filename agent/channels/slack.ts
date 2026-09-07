@@ -99,6 +99,7 @@ async function resolveSlackInboundAuth(
   }
 
   return buildAppSessionAuth(link.appUserId, {
+    channel: "slack",
     email: member.email ?? link.slackEmail,
     name: member.displayName ?? link.slackDisplayName,
     slack_team_id: member.teamId,

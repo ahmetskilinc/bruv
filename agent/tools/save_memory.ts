@@ -1,6 +1,7 @@
 import { defineTool } from "eve/tools";
-import { always } from "eve/tools/approval";
 import { z } from "zod";
+import { approvalUserId, callerChannel, isScheduledTurn } from "../lib/approval.js";
+import { profileSettingsUrl } from "../lib/sendblue.js";
 import { MEMORY_CATEGORIES } from "../../shared/types/memory.js";
 import { saveMemoryRemote } from "../lib/memory-internal.js";
 
@@ -26,7 +27,33 @@ export default defineTool({
       .max(5)
       .describe("Category updates to save together"),
   }),
-  approval: always(),
+  // Enforced here rather than asked for in the prompt. A denial returned at
+  // request time is synchronous: no input request is emitted, so the turn never
+  // parks waiting for an approval nobody can see.
+  approval: (ctx) => {
+    if (!approvalUserId(ctx)) {
+      return {
+        type: "denied",
+        reason:
+          "Memory can only be saved for a signed-in account. Tell them to sign in at bruv.chat first.",
+      };
+    }
+
+    // A scheduled run has nobody watching to approve, and skipping the gate
+    // would let it write unapproved. Refuse instead.
+    if (isScheduledTurn(ctx)) {
+      return { type: "denied", reason: "Memory can't be saved from a scheduled run." };
+    }
+
+    if (callerChannel(ctx) === "sendblue") {
+      return {
+        type: "denied",
+        reason: `Memory saves aren't available over iMessage — tell them to edit it at ${profileSettingsUrl()}, and don't try save_memory again in this thread.`,
+      };
+    }
+
+    return "user-approval";
+  },
   async execute({ updates }, ctx) {
     const userId = ctx.session.auth.current?.principalId;
     if (!userId) {

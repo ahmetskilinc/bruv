@@ -22,7 +22,6 @@ const WEBHOOK_ROUTE = "/eve/v1/sendblue/webhook";
 const IMESSAGE_CHANNEL_CONTEXT = [
   "Channel: iMessage (Sendblue). There is no browser UI in this thread.",
   "Answer the user's question directly with tools when needed.",
-  "Do not call save_memory unless they explicitly ask you to remember or save something.",
 ] as const;
 
 interface PendingInputRequest {
@@ -80,15 +79,6 @@ function threadIdForState(
 
 const pendingInputByThread = new Map<string, PendingInputRequest[]>();
 
-interface InflightSend {
-  from: ChannelFrom<SendblueChannelState>;
-  auth: ChannelSendOptions<SendblueChannelState>["auth"];
-  address: string;
-  state: SendblueChannelState;
-}
-
-let inflightSend: InflightSend | null = null;
-
 function parseApprovalReply(text: string): "approve" | "deny" | null {
   const normalized = text.trim().toLowerCase();
   if (/^(yes|y|oui|ok|approve|remember)$/u.test(normalized)) {
@@ -98,17 +88,6 @@ function parseApprovalReply(text: string): "approve" | "deny" | null {
     return "deny";
   }
   return null;
-}
-
-function isSaveMemoryRequest(request: PendingInputRequest) {
-  return request.toolName === "save_memory";
-}
-
-function denyResponses(requests: readonly PendingInputRequest[]) {
-  return requests.map((request) => ({
-    requestId: request.requestId,
-    optionId: "deny" as const,
-  }));
 }
 
 async function resolvePendingInput(
@@ -122,46 +101,22 @@ async function resolvePendingInput(
     return false;
   }
 
-  const onlySaveMemory = pending.every(isSaveMemoryRequest);
-  const approval = onlySaveMemory ? "deny" : parseApprovalReply(text);
+  const approval = parseApprovalReply(text);
 
   if (!approval) {
-    await postToThread(
-      threadId,
-      onlySaveMemory
-        ? `Skipping memory save — edit your profile at ${profileSettingsUrl()}.`
-        : "Reply YES to approve or NO to skip the pending action.",
-    );
+    await postToThread(threadId, "Reply YES to approve or NO to skip the pending action.");
     return true;
   }
 
   pendingInputByThread.delete(threadId);
 
-  try {
-    inflightSend = {
-      from,
-      auth: sendOptions.auth,
-      address: threadId,
-      state: sendOptions.state,
-    };
-    await from(threadId).respond(
-      pending.map((request) => ({
-        requestId: request.requestId,
-        optionId: approval,
-      })),
-      { auth: sendOptions.auth, state: sendOptions.state },
-    );
-  } finally {
-    inflightSend = null;
-  }
-
-  if (onlySaveMemory) {
-    await postToThread(
-      threadId,
-      `Memory saves are not available in iMessage. Edit your profile at ${profileSettingsUrl()}.`,
-    );
-    return false;
-  }
+  await from(threadId).respond(
+    pending.map((request) => ({
+      requestId: request.requestId,
+      optionId: approval,
+    })),
+    { auth: sendOptions.auth, state: sendOptions.state },
+  );
 
   return true;
 }
@@ -237,8 +192,6 @@ async function dispatchInbound(
       return;
     }
 
-    inflightSend = { from, auth, address: threadId, state: sendOptions.state };
-
     if (mediaUrl) {
       // When an image is present, send as a multimodal parts array.
       // Context strings are prepended as text parts so channel instructions stay intact.
@@ -258,8 +211,6 @@ async function dispatchInbound(
     }
   } catch (error) {
     console.error("[sendblue] agent send failed", error);
-  } finally {
-    inflightSend = null;
   }
 }
 
@@ -408,33 +359,8 @@ export default defineChannel<SendblueChannelState, SendblueChannelContext>({
         requestId: request.requestId,
         toolName: request.action.toolName,
       }));
-      const onlySaveMemory = pending.every(isSaveMemoryRequest);
-
-      if (onlySaveMemory && inflightSend) {
-        await postToThread(
-          threadId,
-          `Memory saves need the web profile on iMessage — skipping. Edit at ${profileSettingsUrl()}.`,
-        );
-        try {
-          await inflightSend.from(inflightSend.address).respond(
-            denyResponses(pending),
-            { auth: inflightSend.auth, state: channel.state },
-          );
-        } catch (error) {
-          console.error("[sendblue] save_memory auto-deny failed", error);
-        }
-        return;
-      }
 
       pendingInputByThread.set(threadId, pending);
-
-      if (onlySaveMemory) {
-        await postToThread(
-          threadId,
-          `Memory saves are not available in iMessage. Edit your profile at ${profileSettingsUrl()}.`,
-        );
-        return;
-      }
 
       const prompts = event.requests.map((request) => request.prompt).join("\n\n");
       await postToThread(
