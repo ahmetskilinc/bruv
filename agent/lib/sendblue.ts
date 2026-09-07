@@ -57,6 +57,20 @@ export function isInboundSendblueMessage(
   return "message_handle" in body && typeof body.message_handle === "string";
 }
 
+/**
+ * The Sendblue line we send from, for paths that have no inbound payload to
+ * read it off — proactive sends, reminders, digests. Throws rather than
+ * returning "" so a misconfigured deploy fails loudly at the send site instead
+ * of silently addressing an empty number.
+ */
+export function sendblueLineNumber() {
+  const configured = process.env.SENDBLUE_FROM_NUMBER?.trim();
+  if (!configured) {
+    throw new Error("SENDBLUE_FROM_NUMBER is not configured.");
+  }
+  return configured;
+}
+
 export function resolveSendblueLineNumber(payload: SendblueMessagePayload) {
   const fromPayload =
     payload.sendblue_number?.trim() ||
@@ -66,6 +80,8 @@ export function resolveSendblueLineNumber(payload: SendblueMessagePayload) {
     return fromPayload;
   }
 
+  // Inbound paths tolerate a missing line number (the payload usually carries
+  // one); only proactive callers need the strict version.
   return process.env.SENDBLUE_FROM_NUMBER?.trim() ?? "";
 }
 
