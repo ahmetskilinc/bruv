@@ -1,5 +1,6 @@
 import type { MemoryByCategory } from "../../shared/types/memory.js";
 import type { UserProfile, UserProfileWithUser } from "../../shared/types/profile.js";
+import { currentDatePrompt } from "./current-time.js";
 import { appOrigin, internalHeaders } from "./internal-api.js";
 
 export interface UserContextPayload {
@@ -48,6 +49,9 @@ export async function saveMemoryRemote(input: {
 export function buildUserContextPrompt(context: UserContextPayload) {
   const { profile, memory } = context;
   const parts: string[] = [];
+
+  // Date first: it is the one piece of context that is wrong by default.
+  parts.push(currentDatePrompt(profile.timezone));
 
   parts.push("# About this user");
   if (profile.name) {

@@ -34,7 +34,11 @@ import { ImageCard, type ImageOutput } from "./tool/image-card";
 import { FortniteCard, type FortniteOutput } from "./tool/fortnite-card";
 import { SourcesCard, type WebSearchOutput } from "./tool/sources-card";
 import { DiffCard } from "./tool/diff-card";
+import { FlightListCard } from "./tool/flight-list-card";
+import { HotelListCard } from "./tool/hotel-list-card";
 import type { ShowDiffOutput } from "@/shared/tools/show_diff";
+import type { FlightSearchOutput } from "@/shared/tools/flights";
+import type { HotelSearchOutput } from "@/shared/tools/hotels";
 import { ToolResult } from "./tool/tool-result";
 
 export function ChatMessage({
@@ -205,6 +209,14 @@ function ToolPart({
       const out = part.output as WebSearchOutput & { error?: string };
       return out?.error ? null : <SourcesCard output={out} />;
     }
+    if (name === "find_flights") {
+      const out = part.output as FlightSearchOutput & { error?: string };
+      return out?.error ? null : <FlightListCard output={out} />;
+    }
+    if (name === "find_hotels") {
+      const out = part.output as HotelSearchOutput & { error?: string };
+      return out?.error ? null : <HotelListCard output={out} />;
+    }
     if (name === "show_diff") {
       const out = part.output as ShowDiffOutput & { error?: string };
       return out?.error ? (
@@ -256,6 +268,8 @@ const RUNNING_LABELS: Record<string, string> = {
   save_memory: "saving to memory",
   show_diff: "reading the diff",
   open_pull_request: "opening the pr",
+  find_flights: "searching flights",
+  find_hotels: "finding places to stay",
 };
 
 function ApprovalRequest({
